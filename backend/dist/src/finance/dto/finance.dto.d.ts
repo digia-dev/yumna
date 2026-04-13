@@ -9,6 +9,7 @@ export declare class CreateTransactionDto {
 }
 export declare class CreateWalletDto {
     name: string;
-    initialBalance?: number;
+    balance: number;
     currency?: string;
+    type?: string;
 }

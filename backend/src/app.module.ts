@@ -14,8 +14,12 @@ import { APP_GUARD } from '@nestjs/core';
 import { UploadsModule } from './uploads/uploads.module';
 import { InvitationsModule } from './invitations/invitations.module';
 import { FamilyModule } from './family/family.module';
+import { BudgetingModule } from './budgeting/budgeting.module';
 import { MailModule } from './mail/mail.module';
 import { UsersModule } from './users/users.module';
+import { AiModule } from './ai/ai.module';
+import { ReligiModule } from './religi/religi.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -39,8 +43,12 @@ import { UsersModule } from './users/users.module';
     UploadsModule,
     InvitationsModule,
     FamilyModule,
+    BudgetingModule,
     MailModule,
     UsersModule,
+    AiModule,
+    ReligiModule,
+    ChatModule,
   ],
   controllers: [AppController, HealthController],
   providers: [

@@ -29,6 +29,8 @@ __decorate([
 class LogZakatDto {
     amount;
     type;
+    recipient;
+    notes;
 }
 exports.LogZakatDto = LogZakatDto;
 __decorate([
@@ -41,4 +43,14 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], LogZakatDto.prototype, "type", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], LogZakatDto.prototype, "recipient", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], LogZakatDto.prototype, "notes", void 0);
 //# sourceMappingURL=zakat.dto.js.map

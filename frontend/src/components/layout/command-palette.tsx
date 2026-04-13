@@ -14,6 +14,11 @@ import {
   Plus,
   Zap,
   Wallet as WalletIcon,
+  Moon,
+  Users,
+  History as HistoryIcon,
+  MessageSquare as MessageIcon,
+  Sparkles,
 } from "lucide-react"
 
 import { useSakinah } from "@/components/providers/sakinah-provider"
@@ -57,17 +62,37 @@ export function CommandPalette() {
       <CommandList>
         <CommandEmpty>Hasil tidak ditemukan.</CommandEmpty>
         <CommandGroup heading="Aksi Cepat">
-          <CommandItem onSelect={() => runCommand(() => router.push("/chat"))}>
+          <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/islamic-tools"))}>
+            <Sparkles className="mr-2 h-4 w-4 text-amber-500" />
+            <span>Pusat Alat Islami Hub</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/chat"))}>
             <Plus className="mr-2 h-4 w-4" />
             <span>Catat Transaksi (AI Chat)</span>
           </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => router.push("/wallets"))}>
+          <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/wallets"))}>
             <WalletIcon className="mr-2 h-4 w-4" />
             <span>Kelola Dompet</span>
           </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => router.push("/calculator"))}>
+          <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/zakat"))}>
             <Calculator className="mr-2 h-4 w-4" />
-            <span>Kalkulator Zakat</span>
+            <span>Kalkulator & Pusat Zakat</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/religi"))}>
+            <Moon className="mr-2 h-4 w-4" />
+            <span>Pusat Ibadah (Religi Hub)</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/zakat/waris"))}>
+            <Users className="mr-2 h-4 w-4" />
+            <span>Kalkulator Waris (Faraid)</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/debts"))}>
+            <HistoryIcon className="mr-2 h-4 w-4" />
+            <span>Manajemen Hutang Sunnah</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/syura"))}>
+            <MessageIcon className="mr-2 h-4 w-4" />
+            <span>Catatan Syura Keluarga</span>
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => toggleSakinahMode())}>
             <Zap className="mr-2 h-4 w-4" />
@@ -81,13 +106,13 @@ export function CommandPalette() {
             <Search className="mr-2 h-4 w-4" />
             <span>Dashboard Beranda</span>
           </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => router.push("/tasks"))}>
+          <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/tasks"))}>
             <Calendar className="mr-2 h-4 w-4" />
             <span>Agenda & Tugas</span>
           </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => router.push("/settings"))}>
+          <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/profile"))}>
             <Settings className="mr-2 h-4 w-4" />
-            <span>Setelan Keluarga</span>
+            <span>Setelan Profil</span>
           </CommandItem>
         </CommandGroup>
       </CommandList>

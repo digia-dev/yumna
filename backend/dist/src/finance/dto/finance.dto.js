@@ -51,8 +51,9 @@ __decorate([
 ], CreateTransactionDto.prototype, "metadata", void 0);
 class CreateWalletDto {
     name;
-    initialBalance;
+    balance;
     currency;
+    type;
 }
 exports.CreateWalletDto = CreateWalletDto;
 __decorate([
@@ -63,12 +64,16 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
-    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
-], CreateWalletDto.prototype, "initialBalance", void 0);
+], CreateWalletDto.prototype, "balance", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateWalletDto.prototype, "currency", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateWalletDto.prototype, "type", void 0);
 //# sourceMappingURL=finance.dto.js.map

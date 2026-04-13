@@ -32,10 +32,13 @@ export class CreateWalletDto {
 
   @IsNumber()
   @Min(0)
-  @IsOptional()
-  initialBalance?: number;
+  balance: number;
 
   @IsString()
   @IsOptional()
   currency?: string;
+
+  @IsString()
+  @IsOptional()
+  type?: string;
 }

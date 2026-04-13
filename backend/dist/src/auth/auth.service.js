@@ -84,7 +84,25 @@ let AuthService = class AuthService {
         if (!isPasswordValid) {
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
-        const payload = { email: user.email, sub: user.id, role: user.role };
+        await this.prisma.$transaction([
+            this.prisma.user.update({
+                where: { id: user.id },
+                data: { lastLoginAt: new Date() },
+            }),
+            this.prisma.auditLog.create({
+                data: {
+                    action: 'LOGIN',
+                    userId: user.id,
+                    details: 'User logged into the system',
+                },
+            }),
+        ]);
+        const payload = {
+            email: user.email,
+            sub: user.id,
+            role: user.role,
+            familyId: user.familyId
+        };
         return {
             access_token: this.jwtService.sign(payload),
             user: {
@@ -92,8 +110,14 @@ let AuthService = class AuthService {
                 email: user.email,
                 name: user.name,
                 role: user.role,
+                familyId: user.familyId,
             },
         };
+    }
+    async deleteAccount(userId) {
+        return this.prisma.user.delete({
+            where: { id: userId },
+        });
     }
 };
 exports.AuthService = AuthService;

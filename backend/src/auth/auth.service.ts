@@ -82,6 +82,8 @@ export class AuthService {
         familyId: user.familyId,
       },
     };
+  }
+
   async deleteAccount(userId: string) {
     return this.prisma.user.delete({
       where: { id: userId },

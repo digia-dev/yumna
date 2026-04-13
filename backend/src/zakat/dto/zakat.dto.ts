@@ -1,4 +1,4 @@
-import { IsNumber, IsString, IsEnum, Min, IsNotEmpty } from 'class-validator';
+import { IsNumber, IsString, IsEnum, Min, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CalculateZakatDto {
   @IsNumber()
@@ -7,7 +7,7 @@ export class CalculateZakatDto {
 
   @IsString()
   @IsNotEmpty()
-  type: 'MAAL' | 'PROFESSION';
+  type: 'MAAL' | 'PROFESSION' | 'FITRAH';
 }
 
 export class LogZakatDto {
@@ -18,4 +18,12 @@ export class LogZakatDto {
   @IsString()
   @IsNotEmpty()
   type: string;
+
+  @IsString()
+  @IsOptional()
+  recipient?: string;
+
+  @IsString()
+  @IsOptional()
+  notes?: string;
 }

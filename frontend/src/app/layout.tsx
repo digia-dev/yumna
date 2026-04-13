@@ -3,8 +3,8 @@ import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SakinahProvider } from "@/components/providers/sakinah-provider";
+import { AuthProvider } from "@/components/providers/auth-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { cn } from "@/lib/utils";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -45,10 +45,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SakinahProvider>
-            {children}
-            <Toaster />
-          </SakinahProvider>
+          <AuthProvider>
+            <SakinahProvider>
+              {children}
+              <Toaster />
+            </SakinahProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

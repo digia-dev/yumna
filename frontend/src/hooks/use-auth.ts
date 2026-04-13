@@ -8,7 +8,10 @@ import { useMemo } from "react";
  * Centralized authentication and user state management for Yumna Frontend.
  */
 export const useAuth = () => {
-  const { data: session, status } = useSession();
+  const result = useSession();
+  
+  const session = result?.data;
+  const status = result?.status || "loading";
 
   const user = session?.user;
   const isLoading = status === "loading";

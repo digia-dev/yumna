@@ -9,7 +9,10 @@ export class TasksService {
   async create(creatorId: string, familyId: string, dto: CreateTaskDto) {
     return this.prisma.task.create({
       data: {
-        ...dto,
+        title: dto.title,
+        description: dto.description,
+        dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
+        assigneeId: dto.assigneeId || null,
         creatorId,
         familyId,
       },

@@ -21,6 +21,14 @@ const app_health_controller_1 = require("./app.health.controller");
 const throttler_1 = require("@nestjs/throttler");
 const core_1 = require("@nestjs/core");
 const uploads_module_1 = require("./uploads/uploads.module");
+const invitations_module_1 = require("./invitations/invitations.module");
+const family_module_1 = require("./family/family.module");
+const budgeting_module_1 = require("./budgeting/budgeting.module");
+const mail_module_1 = require("./mail/mail.module");
+const users_module_1 = require("./users/users.module");
+const ai_module_1 = require("./ai/ai.module");
+const religi_module_1 = require("./religi/religi.module");
+const chat_module_1 = require("./chat/chat.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -45,6 +53,14 @@ exports.AppModule = AppModule = __decorate([
                     limit: 10,
                 }]),
             uploads_module_1.UploadsModule,
+            invitations_module_1.InvitationsModule,
+            family_module_1.FamilyModule,
+            budgeting_module_1.BudgetingModule,
+            mail_module_1.MailModule,
+            users_module_1.UsersModule,
+            ai_module_1.AiModule,
+            religi_module_1.ReligiModule,
+            chat_module_1.ChatModule,
         ],
         controllers: [app_controller_1.AppController, app_health_controller_1.HealthController],
         providers: [

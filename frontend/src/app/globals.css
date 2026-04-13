@@ -181,3 +181,24 @@
   padding-inline: 1rem;
   transition: all 0.5s ease;
 }
+
+/* Ramadan Mode */
+.ramadan-theme {
+  --background: #fdfaf3; /* Warm off-white */
+  --primary: #064e3b;
+  --secondary: #d4af37;
+  --accent: #fef3c7; /* Amber tint */
+}
+
+.ramadan-theme .premium-gradient {
+  background: linear-gradient(135deg, #064e3b 0%, #d4af37 100%);
+}
+
+.ramadan-theme Card {
+  border-color: #fde68a;
+}
+
+.ramadan-theme ::selection {
+  background: #fde68a;
+  color: #064e3b;
+}

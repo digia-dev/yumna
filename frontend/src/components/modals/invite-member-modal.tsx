@@ -40,7 +40,7 @@ export function InviteMemberModal({ children }: { children: React.ReactNode }) {
       toast.success(`Undangan berhasil dikirim ke ${email}`);
       setOpen(false);
       setEmail("");
-    } catch (error) {
+    } catch {
       toast.error("Gagal mengirim undangan. Silakan coba lagi.");
     } finally {
       setIsLoading(false);

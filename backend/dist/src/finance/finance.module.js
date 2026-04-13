@@ -16,7 +16,8 @@ exports.FinanceModule = FinanceModule;
 exports.FinanceModule = FinanceModule = __decorate([
     (0, common_1.Module)({
         providers: [finance_service_1.FinanceService],
-        controllers: [finance_controller_1.FinanceController]
+        controllers: [finance_controller_1.FinanceController],
+        exports: [finance_service_1.FinanceService],
     })
 ], FinanceModule);
 //# sourceMappingURL=finance.module.js.map

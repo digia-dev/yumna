@@ -92,10 +92,10 @@ export default function LoginPage() {
           <LogIn size={18} className="ml-2" />
         </Button>
 
-        <div className="relative flex items-center gap-4 py-2">
-          <div className="bg-muted h-[1px] flex-1" />
-          <span className="text-muted-foreground text-xs uppercase">atau</span>
-          <div className="bg-muted h-[1px] flex-1" />
+        <div className="flex items-center gap-2">
+          <div className="h-px w-8 bg-border" />
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Atau</span>
+          <div className="h-px w-8 bg-border" />
         </div>
 
         <Button

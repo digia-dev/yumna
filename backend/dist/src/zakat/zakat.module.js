@@ -10,13 +10,17 @@ exports.ZakatModule = void 0;
 const common_1 = require("@nestjs/common");
 const zakat_service_1 = require("./zakat.service");
 const zakat_controller_1 = require("./zakat.controller");
+const inheritance_service_1 = require("./inheritance.service");
+const axios_1 = require("@nestjs/axios");
 let ZakatModule = class ZakatModule {
 };
 exports.ZakatModule = ZakatModule;
 exports.ZakatModule = ZakatModule = __decorate([
     (0, common_1.Module)({
-        providers: [zakat_service_1.ZakatService],
-        controllers: [zakat_controller_1.ZakatController]
+        imports: [axios_1.HttpModule],
+        providers: [zakat_service_1.ZakatService, inheritance_service_1.InheritanceService],
+        controllers: [zakat_controller_1.ZakatController],
+        exports: [zakat_service_1.ZakatService, inheritance_service_1.InheritanceService],
     })
 ], ZakatModule);
 //# sourceMappingURL=zakat.module.js.map

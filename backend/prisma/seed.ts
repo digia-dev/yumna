@@ -76,6 +76,7 @@ async function main() {
       description: 'Sedekah Jumat ke Masjid',
       userId: ayah.id,
       walletId: tabunganUtama.id,
+      familyId: family.id,
       date: new Date(),
       metadata: { isZakat: false, impact: 'High' },
     },
@@ -89,6 +90,7 @@ async function main() {
       description: 'Beli sayuran',
       userId: ibu.id,
       walletId: dompetHarian.id,
+      familyId: family.id,
       date: new Date(),
     },
   });

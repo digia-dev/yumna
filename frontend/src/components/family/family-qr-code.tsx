@@ -32,7 +32,7 @@ export function FamilyQRCode({ familyId, familyName }: FamilyQRCodeProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md text-center">
         <DialogHeader>
-          <DialogTitle>ID Keluarga {{familyName}}</DialogTitle>
+          <DialogTitle>ID Keluarga {familyName}</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col items-center space-y-6 py-6">
           <div className="p-4 bg-white rounded-2xl shadow-inner border">
@@ -54,7 +54,7 @@ export function FamilyQRCode({ familyId, familyName }: FamilyQRCodeProps) {
             </div>
           </div>
           <p className="text-sm text-muted-foreground italic">
-            "Pindai atau bagikan kode ini untuk mengundang anggota keluarga baru secara instan."
+            &quot;Pindai atau bagikan kode ini untuk mengundang anggota keluarga baru secara instan.&quot;
           </p>
           <Button className="w-full gap-2">
             <Share2 size={18} />

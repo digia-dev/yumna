@@ -13,7 +13,18 @@ export declare class JwtStrategy extends JwtStrategy_base {
         updatedAt: Date;
         email: string;
         password: string;
+        image: string | null;
         role: import("@prisma/client").$Enums.UserRole;
+        needsPasswordChange: boolean;
+        twoFactorEnabled: boolean;
+        allowanceLimit: import("@prisma/client-runtime-utils").Decimal | null;
+        resetToken: string | null;
+        resetTokenExpires: Date | null;
+        status: string | null;
+        statusIcon: string | null;
+        isFirstLogin: boolean;
+        lastLoginAt: Date | null;
+        lastIp: string | null;
         familyId: string | null;
     }>;
 }

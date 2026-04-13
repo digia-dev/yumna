@@ -15,27 +15,59 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZakatController = void 0;
 const common_1 = require("@nestjs/common");
 const zakat_service_1 = require("./zakat.service");
+const inheritance_service_1 = require("./inheritance.service");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const get_user_decorator_1 = require("../auth/decorators/get-user.decorator");
 const zakat_dto_1 = require("./dto/zakat.dto");
 let ZakatController = class ZakatController {
     zakatService;
-    constructor(zakatService) {
+    inheritanceService;
+    constructor(zakatService, inheritanceService) {
         this.zakatService = zakatService;
+        this.inheritanceService = inheritanceService;
     }
     async getNisab() {
         const maal = await this.zakatService.getNisabMaal();
         const profession = await this.zakatService.getNisabProfession();
-        return { maal, profession };
+        const silverPrice = await this.zakatService.getSilverPrice();
+        const silver = 595 * silverPrice;
+        return { maal, profession, silver, silverPrice };
+    }
+    async getQuotes() {
+        return this.zakatService.getDailyQuotes();
+    }
+    async getWaqaf(familyId) {
+        return this.zakatService.getWaqaf(familyId);
+    }
+    async createWaqaf(familyId, data) {
+        return this.zakatService.createWaqaf(familyId, data);
+    }
+    async calculateWaris(data) {
+        return this.inheritanceService.calculateInheritance(data.totalWealth, data.heirs);
     }
     async calculate(dto) {
         if (dto.type === 'MAAL') {
             return this.zakatService.calculateZakatMaal(dto.amount);
         }
-        return this.zakatService.calculateZakatProfession(dto.amount);
+        if (dto.type === 'PROFESSION') {
+            return this.zakatService.calculateZakatProfession(dto.amount);
+        }
+        return this.zakatService.calculateZakatFitrah(Number(dto.amount));
+    }
+    async getHistory(familyId) {
+        return this.zakatService.getZakatHistory(familyId);
+    }
+    async getReminders(familyId) {
+        return this.zakatService.getZakatReminders(familyId);
+    }
+    async getHaul(familyId) {
+        return this.zakatService.checkHaulStatus(familyId);
+    }
+    async calculateFidyah(body) {
+        return this.zakatService.calculateFidyah(body.days);
     }
     async logPayment(familyId, dto) {
-        return this.zakatService.logZakatPayment(familyId, dto.amount, dto.type);
+        return this.zakatService.logZakatPayment(familyId, dto.amount, dto.type, dto.recipient, dto.notes);
     }
 };
 exports.ZakatController = ZakatController;
@@ -46,12 +78,68 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ZakatController.prototype, "getNisab", null);
 __decorate([
+    (0, common_1.Get)('quotes'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ZakatController.prototype, "getQuotes", null);
+__decorate([
+    (0, common_1.Get)('waqaf'),
+    __param(0, (0, get_user_decorator_1.GetUser)('familyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ZakatController.prototype, "getWaqaf", null);
+__decorate([
+    (0, common_1.Post)('waqaf'),
+    __param(0, (0, get_user_decorator_1.GetUser)('familyId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], ZakatController.prototype, "createWaqaf", null);
+__decorate([
+    (0, common_1.Post)('inheritance'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ZakatController.prototype, "calculateWaris", null);
+__decorate([
     (0, common_1.Post)('calculate'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [zakat_dto_1.CalculateZakatDto]),
     __metadata("design:returntype", Promise)
 ], ZakatController.prototype, "calculate", null);
+__decorate([
+    (0, common_1.Get)('history'),
+    __param(0, (0, get_user_decorator_1.GetUser)('familyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ZakatController.prototype, "getHistory", null);
+__decorate([
+    (0, common_1.Get)('reminders'),
+    __param(0, (0, get_user_decorator_1.GetUser)('familyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ZakatController.prototype, "getReminders", null);
+__decorate([
+    (0, common_1.Get)('haul-status'),
+    __param(0, (0, get_user_decorator_1.GetUser)('familyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ZakatController.prototype, "getHaul", null);
+__decorate([
+    (0, common_1.Post)('fidyah'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ZakatController.prototype, "calculateFidyah", null);
 __decorate([
     (0, common_1.Post)('log'),
     __param(0, (0, get_user_decorator_1.GetUser)('familyId')),
@@ -63,6 +151,7 @@ __decorate([
 exports.ZakatController = ZakatController = __decorate([
     (0, common_1.Controller)('zakat'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __metadata("design:paramtypes", [zakat_service_1.ZakatService])
+    __metadata("design:paramtypes", [zakat_service_1.ZakatService,
+        inheritance_service_1.InheritanceService])
 ], ZakatController);
 //# sourceMappingURL=zakat.controller.js.map
