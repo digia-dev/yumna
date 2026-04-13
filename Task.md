@@ -1,0 +1,553 @@
+# 500 Task Checklist Plan for Yumna App Building
+**Project:** Yumna - Family Financial Management
+**Document Version:** 1.0
+**Total Tasks:** 500 Steps
+
+---
+
+## Phase 1: Project Initialization & Environment Setup (1-30)
+- [x] 1. Initialize Git repository with `main` and `develop` branches.
+- [x] 2. Setup GitHub Actions for CI/CD pipeline scaffolding.
+- [x] 3. Configure `.gitignore` for Node.js, Next.js, and environment variables.
+- [x] 4. Initialize Next.js project with TypeScript and Tailwind CSS.
+- [x] 5. Install essential dependencies (Radix UI, Lucide Icons, Framer Motion).
+- [x] 6. Setup ESLint with strict TypeScript rules.
+- [x] 7. Configure Prettier for consistent code formatting.
+- [x] 8. Setup Husky for pre-commit hooks (linting and type-checking).
+- [x] 9. Initialize Backend (NestJS) project structure.
+- [x] 10. Configure Docker Compose for local development (PostgreSQL, Redis).
+- [x] 11. Setup environment variable management (.env.example).
+- [x] 12. Configure Path Aliases in `tsconfig.json` (@/components, @/lib, etc.).
+- [x] 13. Create a README.md with system architecture diagrams.
+- [x] 14. Setup a project management board (Jira/Trello/GitHub Projects).
+- [x] 15. Define a branching strategy (GitFlow).
+- [x] 16. Configure basic logging system (Winston or Pino).
+- [x] 17. Setup error handling middleware on the backend.
+- [x] 18. Initialize a documentation folder using Docusaurus or plain Markdown.
+- [x] 19. Configure API documentation with Swagger (OpenAPI).
+- [x] 20. Setup unit testing framework (Jest/Vitest).
+- [x] 21. Configure End-to-End testing (Playwright or Cypress).
+- [x] 22. Setup a staging environment on Vercel/Railway.
+- [x] 23. Initialize local Authentication logic with JWT and bcrypt.
+- [x] 24. Configure standard response JSON structure for all API endpoints.
+- [x] 25. Setup CORS (Cross-Origin Resource Sharing) policies.
+- [x] 26. Configure security headers (Helmet.js).
+- [x] 27. Initialize Database migrations tool (Prisma or TypeORM).
+- [x] 28. Define naming conventions for files and folders.
+- [x] 29. Setup a shared type library for Frontend and Backend.
+- [x] 30. Conduct a team kickoff meeting to align on the technical stack.
+
+## Phase 2: UI/UX Design & Design System (31-80)
+- [x] 31. Create a "Yumna" design system.
+- [x] 32. Define primary color palette (Emerald/Gold/Deep Charcoal).
+- [x] 33. Select typography (Inter/Outfit for modern Islamic feel).
+- [x] 34. Design button variants (Primary, Secondary, Ghost, Outline).
+- [x] 35. Design input field states (Idle, Focus, Error, Disabled).
+- [x] 36. Define border radius tokens (4px for Semi-Squared look).
+- [x] 37. Design custom icon set for Yumna (Wallets, Zakat, Mosque icons).
+- [x] 38. Create high-fidelity wireframes for the Authentication flow.
+- [x] 39. Create high-fidelity wireframes for the Dashboard (Mobile & Desktop).
+- [x] 40. Design Wallet Management interface (Cards and Lists).
+- [x] 41. Design Transaction Entry modal/page.
+- [x] 42. Design AI Chat interface (Bubbles, Input bar, confirmation cards).
+- [x] 43. Design Zakat Calculator step-by-step UI.
+- [x] 44. Design Task Management board (Checklist UI).
+- [x] 45. Design Family Settings and Invitation page.
+- [x] 46. Design Subscription/Premium checkout page.
+- [x] 47. Create a responsive grid layout system.
+- [x] 48. Define animation tokens for transitions (Tailwind @theme).
+- [x] 49. Design skeleton loaders for all major components.
+- [x] 50. Design 404 and Error state pages.
+- [x] 51. Create a "Dark Mode" color scheme.
+- [x] 52. Map out the User Flow for Homeboarding.
+- [x] 53. Map out the User Flow for NLP Transaction logging.
+- [x] 54. Design onboarding walkthrough screens.
+- [x] 55. Fix font scaling for mobile responsiveness.
+- [x] 56. Export all assets (SVG icons, illustrations).
+- [x] 57. Create a clickable prototype for stakeholder review.
+- [x] 58. Validate accessibility (WCAG 2.1) color contrast ratios.
+- [x] 59. Implement the design system in Tailwind CSS config (`tailwind.config.js`).
+- [x] 60. Create a UI Library documentation (Design System Preview Page).
+- [x] 61. Implement Base Button component with Tailwind.
+- [x] 62. Implement Input component with validation states.
+- [x] 63. Implement Card component with consistent shadow/border.
+- [x] 64. Implement Modal/Dialog component (Radix UI).
+- [x] 65. Implement Dropdown/Select/Select component.
+- [x] 66. Implement Toast notification component (Sonner).
+- [x] 67. Implement Badge/Status indicator component.
+- [x] 68. Implement Progress bar and Circular progress bar.
+- [x] 69. Implement Table component with sorting/filtering UI.
+- [x] 70. Implement Tab navigation component.
+- [x] 71. Implement Tooltip component.
+- [x] 72. Implement Accordion component for FAQs.
+- [x] 73. Implement Drawer/Sheet component for mobile navigation.
+- [x] 74. Implement Navigation Bar (top/side) with Active states.
+- [x] 75. Implement Bottom Navigation for mobile PWA view.
+- [x] 76. Develop a shared Layout wrapper component.
+- [x] 77. Create a reusable Page Header component.
+- [x] 78. Implement Footer with links and socials.
+- [x] 79. Setup a Global State for UI themes (Light/Dark).
+- [x] 80. Optimize images and SVGs for performance.
+
+## Phase 2.1: Advanced UI/UX & Atmospheric Polishing (80a-80j)
+- [x] 80a. Design & Implement custom Chart.js/Recharts theme for Financial Analytics.
+- [x] 80b. Implement page transitions using Framer Motion (Slide-over effect).
+- [x] 80c. Design "Bismillah" success state animation for Transactions (Lottie/Framer).
+- [x] 80d. Create custom SVG illustrations for empty states (Wallets, Tasks, Zakat).
+- [x] 80e. Implement Global Command Palette (Ctrl+K) for quick navigation & actions.
+- [x] 80f. Conduct accessibility audit for Dark/Light mode color contrast (WCAG 2.1).
+- [x] 80g. Implement Fluid Typography system using CSS `clamp()` for premium scaling.
+- [x] 80h. Design & Implement a custom "Legacy Timeline" vertical progress component.
+- [x] 80i. Setup automated UI regression testing for core components.
+- [x] 80j. Implement "Sakinah Mode" (Special focus mode with minimalist UI).
+
+## Phase 2.2: PWA, Social & Tone Consistency (80k-80o)
+- [x] 80k. Setup PWA manifest, service workers, and high-fidelity splash screens.
+- [x] 80n. Design Dynamic OpenGraph (OG) images for family invite sharing.
+- [x] 80o. Standardize Microcopy across the app (Ensuring Tone of Voice: Sakinah & Empathetic).
+
+## Phase 3: Database & Backend Infrastructure (81-130)
+- [x] 81. Define Prisma Schema for `Family` model.
+- [x] 82. Define Prisma Schema for `User` model with Roles.
+- [x] 83. Define Prisma Schema for `Wallet` model.
+- [x] 84. Define Prisma Schema for `Transaction` model (with category and source).
+- [x] 85. Define Prisma Schema for `Task` model.
+- [x] 86. Define Prisma Schema for `Zakat` log model.
+- [x] 87. Define Prisma Schema for `FamilyInvitation` model.
+- [x] 88. Setup database relationships (Foreign Keys, Joins).
+- [x] 89. Implement soft delete logic for Transactions.
+- [x] 90. Create database seeders for transaction categories (Islamic context).
+- [x] 91. Implement Database indexing on `FamilyID` and `UserID`.
+- [x] 92. Configure Database connection pooling (Prisma 7 Adapter).
+- [x] 93. Initialize Redis client for family chat caching.
+- [x] 94. Standardize CUID generation for all primary keys.
+- [x] 95. Setup automated DB backups script (`scripts/backup-db.ps1`).
+- [x] 96. Implement Type-safe service layer (Finance & Zakat Services).
+- [x] 97. Configure DTO (Data Transfer Objects) for Finance, Zakat, and Tasks.
+- [x] 98. Implement class-validator for backend input verification.
+- [x] 99. Setup global exception filter for API errors.
+- [x] 100. Implement standard API response interceptors.
+- [x] 101. Implement Authentication module with Passport.js and JWT strategy.
+- [x] 102. Implement Middleware to verify JWT on every request.
+- [x] 103. Create `getCurrentUser` decorator for NestJS.
+- [x] 104. Implement Role-Based Access Control (RBAC) Guard.
+- [x] 105. Implement Family-Based Isolation logic in Finance/Zakat Service.
+- [x] 106. Setup Auto-migration scripts (`infra:init`).
+- [x] 107. Implement Health Check endpoint (/health).
+- [x] 108. Setup environment-based DB URLs.
+- [x] 109. Write integration tests for User creation.
+- [x] 110. Write integration tests for Wallet creation.
+- [x] 111. Configure Sentry for backend error tracking.
+- [x] 112. Implement API Rate Limiting.
+- [x] 113. Configure File Upload service (S3 or local if small).
+- [x] 114. Create a script to prune old chat messages from Redis.
+- [x] 115. Implement a Transaction rollback strategy for multi-step ops.
+- [x] 116. Setup Database logging in development mode.
+- [x] 117. Configure Prisma Studio for easy data viewing.
+- [x] 118. Implement `metadata` field in transaction for extensible data.
+- [x] 119. Create a notification schema (ID, UserID, Message, ReadStatus).
+- [x] 120. Implement a background job queue (BullMQ) for exports.
+- [x] 121. Write unit tests for the Balance Calculation logic.
+- [x] 122. Write unit tests for Zakat Calculation engine.
+- [x] 123. Implement a dynamic configuration service for global settings.
+- [x] 124. Configure different port for WebSocket (optional) or use same port.
+- [x] 125. Implement a maintenance mode flag.
+- [x] 126. Create a standardized folder structure for NestJS modules.
+- [x] 127. Configure Docker volumes for persistent DB storage.
+- [x] 128. Implement secure password hashing using bcrypt for all users.
+- [x] 129. Create a utility for currency formatting (IDR, etc.).
+- [x] 130. Setup Swagger documentation for the Finance module.
+
+## Phase 4: Authentication & Family Onboarding (131-180)
+- [x] 131. Implement Registration page UI.
+- [x] 132. Implement Login page UI with Google SSO.
+- [x] 133. Setup NextAuth.js (Auth.js) in the Frontend.
+- [x] 134. Create `useAuth` hook for managing user state.
+- [x] 135. Implement "Forget Password" flow.
+- [x] 136. Create "Create Family" onboarding screen.
+- [x] 137. Implement "Join Family via Invite" logic.
+- [x] 138. Develop the Welcome walkthrough component.
+- [x] 139. Create "Invite Family Member" modal with email input.
+- [x] 140. Implement API for generating unique invite codes (/invitations).
+- [x] 141. Implement API for accepting invitations (/invitations/accept).
+- [x] 142. Implement Logic to prevent joining multiple families (per business rule).
+- [x] 143. Create Profile Management page.
+- [x] 144. Implement Avatar upload functionality.
+- [x] 145. Implement Role selection UI for Kepala Keluarga to assign roles.
+- [x] 146. Develop the "Family Settings" page (Change Family Name, Logo).
+- [x] 147. Create a Member List view with Delete/Kick functionality.
+- [x] 148. Implement Logout logic and session clearing.
+- [x] 149. Setup Auth persistence in LocalStorage/Cookies.
+- [x] 150. Create an Unauthorized/Access Denied state page.
+- [x] 151. Implement "Resend Verification Email" button (Mock logic).
+- [x] 152. Build the "Onboarding Progress" indicator.
+- [x] 153. Implement "Check for Family Name Availability".
+- [x] 154. Setup Email templates for Invites using Handlebars.
+- [x] 155. Configure SMTP service for outgoing emails.
+- [x] 156. Implement API for tracking invitation status (Pending/Accepted).
+- [x] 157. Create a "Force Password Change" flag for new members.
+- [x] 158. Implement "Last Login" tracking in the User model.
+- [x] 159. Build a "Delete My Account" flow with confirmation.
+- [x] 160. Implement "Leave Family" functionality for members.
+- [x] 161. Create a "Family ID" shareable QR Code.
+- [x] 162. Implement PIN/Biometric lock UI (for PWA mobile).
+- [x] 163. Handle session expiration with automatic re-login attempt.
+- [x] 164. Create a custom 2FA (Two-Factor Authentication) toggle.
+- [x] 165. Develop the "Privacy Settings" component for members.
+- [x] 166. Implement Terms of Service (TOS) checkbox logic.
+- [x] 167. Setup Analytics for user registration sign-ups.
+- [x] 168. Build a "Switch Account" modal to support multi-family switching (Phase 4 final).
+- [x] 169. Implement "Session Management" view (seeing active devices).
+- [x] 170. Setup "First-time login" flag to trigger tutorial.
+- [x] 171. Create a "User Handbook" link in the profile.
+- [x] 172. Implement "Status Update" (Feeling/Activity) for family members.
+- [x] 173. Build the "Family Tree" visualization (Optional/Fun feature).
+- [x] 174. Configure secure session handling and HTTP-only cookies.
+- [x] 175. Implement "Audit Log" for user auth events.
+- [x] 176. Create a "Family Photo" gallery component.
+- [x] 177. Document the Onboarding flow for internal QA.
+- [x] 178. Build a "Family Join Requests" admin dashboard (Infrastructure ready).
+- [x] 179. Implement "Shared Family Goals" intro during onboarding.
+- [x] 180. Setup "Family Currency" default setting.
+- [x] 180a. Implement WhatsApp Invitation Link sharing for easier onboarding.
+- [x] 180b. Add Biometric (WebAuthn) prompt for PWA mobile users.
+- [x] 180c. Create "Family Role" interactive guide during onboarding.
+
+## Phase 5: Core Finance - Wallet & Transactions (181-230)
+- [ ] 181. Create the Wallet Dashboard UI (Total Balance + Wallet Cards).
+- [ ] 182. Implement "Add New Wallet" modal (Name, Initial Balance, Type).
+- [ ] 183. Implement "Edit Wallet" functionality.
+- [ ] 184. Implement "Archive/Delete Wallet" logic.
+- [ ] 185. Create a "Wallet Details" page with transaction history.
+- [ ] 186. Build the "Create Transaction" floating action button (FAB).
+- [ ] 187. Implement Transaction Form with Amount, Date, Category, Payment Method.
+- [ ] 188. Develop Category icons and color coding system.
+- [ ] 189. Implement "Recurring Transaction" toggle (Weekly/Monthly).
+- [ ] 190. Create "Income vs Expense" toggle in the form.
+- [ ] 191. Implement API to fetch all transactions with pagination.
+- [ ] 192. Add Server-side filtering by Category/Date Range.
+- [ ] 193. Add Search functionality for transaction notes.
+- [ ] 194. Implement "Balance Real-time Calculation" on the frontend.
+- [ ] 195. Create Transaction Row component with icons and amount colors.
+- [ ] 196. Implement "Delete Transaction" with confirmation.
+- [ ] 197. Implement "Edit Transaction" logic.
+- [ ] 198. Build the "Transaction Detail" modal.
+- [ ] 199. Implement "Transfer Between Wallets" functionality.
+- [ ] 200. Create a "Budgeting" feature per category.
+- [ ] 201. Implement Budget progress bar (Spent vs Limit).
+- [ ] 202. Setup "Over-budget" notifications.
+- [ ] 203. Create a "Cash Flow" chart (Line Chart for Trends).
+- [ ] 204. Create a "Spending by Category" donut chart.
+- [ ] 205. Implement "Multi-Currency" support (Convert to IDR).
+- [ ] 206. Create a "Favorite Transactions" list (for quick entry).
+- [ ] 207. Build the "Recent Activity" widget for the main dashboard.
+- [ ] 208. Implement "Bulk Delete" transactions feature.
+- [ ] 209. Setup automated daily balance snapshots for history.
+- [ ] 210. Create an API for "Financial Summary" (Income/Expense/Net).
+- [ ] 211. Implement "Tagging" system for transactions (e.g., #Liburan).
+- [ ] 212. Create a "Shared Wallet" permission logic (who can see what).
+- [ ] 213. Implement "Attachment" (Receipt image) for transactions.
+- [ ] 214. Add "Islamic Savings Goals" integration in Wallet (Save for Umroh).
+- [ ] 215. Implement "Rounding" logic for transaction numbers.
+- [ ] 216. Build a "Debt/Receivable" mini-module.
+- [ ] 217. Create an API for "Top Spending Categories".
+- [ ] 218. Implement "Export current view to CSV".
+- [ ] 219. Setup "Transaction Alerts" push notifications.
+- [ ] 220. Develop the "Wallet Transfer History" view.
+- [ ] 221. Implement "Zero-waste Budgeting" logic.
+- [ ] 222. Create a "Finance Report" generator (HTML view).
+- [ ] 223. Implement "Quick Add" Siri/Shortcuts integration (for iOS/Android).
+- [ ] 224. Add "Location" tag to transactions.
+- [ ] 225. Setup "Auto-reconcile" with bank imports (Future/CSV Import).
+- [ ] 226. Implement "Split Bill" helper UI within family.
+- [ ] 227. Build a "Child Allowance" tracker.
+- [ ] 228. Create a "Financial Health Score" algorithm based on spent/income.
+- [ ] 229. Implement CRUD for "Custom Categories".
+- [ ] 230. Run a performance test on 10,000+ transactions query.
+
+## Phase 6: Islamic Tools - Zakat & Nisab (231-280)
+- [ ] 231. Create the "Zakat Hub" page.
+- [ ] 232. Implement Zakat Maal Calculator (Wealth based).
+- [ ] 233. Implement Zakat Profesi Calculator (Monthly Income based).
+- [ ] 234. Implement Zakat Fitrah Calculator (Family members based).
+- [ ] 235. Integrate External API for live Gold Price tracking.
+- [ ] 236. Develop the Nisab Threshold logic (85g Gold).
+- [ ] 237. Create a "Nisab Alert" (Notify if wealth exceeds Nisab).
+- [ ] 238. Implement "Haul Tracker" (Have you held wealth for 1 year?).
+- [ ] 239. Create "Zakat Payment History" log.
+- [ ] 240. Implement "Zakat Distribution" tracker (where you gave the zakat).
+- [ ] 241. Build the "Savings for Qurban" tracker.
+- [ ] 242. Build the "Umroh/Hajj Savings Goal" with progress bar.
+- [ ] 243. Create a "Fidyah/Kaffarah" calculator helper.
+- [ ] 244. Implement "Islamic Charity" (Sedekah/Infaq) widget.
+- [ ] 245. Develop "Halal Earnings Tracker" (Differentiate Halal/Subhat).
+- [ ] 246. Create "Islamic Finance Education" tips (Daily quotes).
+- [ ] 247. Implement "Debt (Hutang) Tracking" with Sunnah reminders.
+- [ ] 248. Build a "Inheritance (Waris) Calculator" (as a separate tool).
+- [ ] 249. Create a "Waqaf tracker".
+- [ ] 250. Setup automated "Monthly Zakat Reminder".
+- [ ] 251. Implement "Nisab Silver" option (for certain schools of thought).
+- [ ] 252. Create a "Yearly Financial Audit for Zakat" report.
+- [ ] 253. Develop the "Sadaqah Jarayah" goal planner.
+- [ ] 254. Implement "Halal Merchant Finder" basic UI (Maps Integration).
+- [ ] 255. Integrate "Mosque/Masjid Near Me" feature.
+- [ ] 256. Create "Prayer Times" widget in the dashboard.
+- [ ] 257. Implement "Qibla Direction" tool (Mobile PWA).
+- [ ] 258. Build a "Khatam Quran Tracker" for the family.
+- [ ] 259. Implement "Islamic Event Calendar" (Ramadan, Eid, etc.).
+- [ ] 260. Create "Fasting Tracker" (Puasa Sunnah/Wajib).
+- [ ] 261. Develop "Islamic Habit Tracker" (Tahajjud, Duha).
+- [ ] 262. Build the "Child Sholat Tracker" (Gamified).
+- [ ] 263. Implement "Halal Food Checklist" (E-codes scanner future).
+- [ ] 264. Create a "Zakat Distribution Certificate" generator (Unofficial/Note).
+- [ ] 265. Implement "Tax vs Zakat" comparison tool.
+- [ ] 266. Setup "Ramadan Mode" UI theme.
+- [ ] 267. Create "Iftar/Sahur" reminder alerts.
+- [ ] 268. Build a "Family Dzikir" counter/score.
+- [ ] 269. Implement "Islamic Loan Agreements" memo generator.
+- [ ] 270. Test calculators against standard Baznas/BAZ formulas.
+- [ ] 271. Implement "Auto-fill Wealth from Wallets" for Zakat Maal.
+- [ ] 272. Create a "Wealth Breakdown" pie chart for Zakat.
+- [ ] 273. Build a "Debt Deduction" logic in Zakat calculation.
+- [ ] 274. Implement "Lapsed Zakat" manual entry.
+- [ ] 275. Create "Zakat Goal" (Planning to pay X by date).
+- [ ] 276. Build the "Savings Target" component for Qurban animals.
+- [ ] 277. Develop the "Price Estimator" for Umroh/Hajj.
+- [ ] 278. Implement "Family Syura" (Meeting) Notes for finance.
+- [ ] 279. Create a "Halal Finance Glossary" in the app.
+- [ ] 280. Finalize the "Islamic Tools" sidebar navigation.
+
+## Phase 7: Yumna AI Assistant & NLP (281-330)
+- [ ] 281. Setup OpenAI/Azure GPT-4o API connection.
+- [ ] 282. Develop the Backend Chat Controller.
+- [ ] 283. Implement the NLP Extraction Service (Prompt Engineering).
+- [ ] 284. Create a logic to map NLP output to Database Categories.
+- [ ] 285. Implement "Chat History" fetching with infinite scroll.
+- [ ] 286. Create the "Chat UI" for Group Message.
+- [ ] 287. Implement "Typing Indicator" for AI.
+- [ ] 288. Build the "Confirmation Card" for AI-detected transactions.
+- [ ] 289. Develop "AI Message Bubble" with Markdown support.
+- [ ] 290. Implement "Voice Messaging" for Chat (Speech-to-Text).
+- [ ] 291. Create automated "Welcome to AI Chat" instruction message.
+- [ ] 292. Implement "Context Awareness" (knowing recent transactions).
+- [ ] 293. Setup "AI Advisor" scheduled report (Weekly insight).
+- [ ] 294. Create a "Spending Trend Analysis" prompt.
+- [ ] 295. Implement "NLP Task Detection" (Create task from "Tolong belikan susu").
+- [ ] 296. Build a "Chat-based Search" for transactions.
+- [ ] 297. Implement "AI Persona" selector (Friendly/Formal/Islamic).
+- [ ] 298. Setup "Message Encryption" for chat privacy.
+- [ ] 299. Implement "Reaction" system for family chat.
+- [ ] 300. Create "Pinned Messages" feature in Chat.
+- [ ] 301. Implement "AI Trigger Words" (e.g., /status, /zakat).
+- [ ] 302. Build the "Smart Reply" suggestions for chat.
+- [ ] 303. Develop "File Sharing" in chat (for receipt images).
+- [ ] 304. Implement "Link Preview" in chat messages.
+- [ ] 305. Create a "Family Poll" feature in chat.
+- [ ] 306. Setup "AI Moderation" for family-friendly content.
+- [ ] 307. Implement "Offline Chat" queueing.
+- [ ] 308. Create a "Chat Backup" export tool.
+- [ ] 309. Develop "Scheduled Messages" logic for AI (Reminders).
+- [ ] 310. Implement "Multi-language" NLP support (Indonesian focus).
+- [ ] 311. Test AI with complex phrases ("Sore tadi beli soto 3 porsi total 45rb").
+- [ ] 312. Implement "Refusal Logic" (AI should not answer Non-finance).
+- [ ] 313. Create a "Developer Console" for AI Logs.
+- [ ] 314. Optimize LLM Token usage to minimize costs.
+- [ ] 315. Implement "Cost Tracking" dashboard for AI API.
+- [ ] 316. Setup "Rate Limiting" for AI chat per family.
+- [ ] 317. Build the "AI Feedback" system (Good/Bad response).
+- [ ] 318. Create "Proactive AI" (AI starts chat about budget limit).
+- [ ] 319. Implement "System Instructions" update mechanism.
+- [ ] 320. Create "Chat Search" UI.
+- [ ] 321. Build "Emoji Picker" for family chat.
+- [ ] 322. Implement "Message Deletion" for chat.
+- [ ] 323. Develop "Chat Notifications" with reply action.
+- [ ] 324. Create "Group Info" sidebar in chat.
+- [ ] 325. Implement "Direct Message" between family members (maybe?).
+- [ ] 326. Setup "Auto-translate" for mixed-language families.
+- [ ] 327. Build "Image-to-Transaction" (OCR for receipts).
+- [ ] 328. Implement "AI Financial Coach" gamification.
+- [ ] 329. Test the AI on "Mixed Transactions" (Bought A, B, and C).
+- [ ] 330. Conduct a "Turing Test" style UAT for the NLP accuracy.
+
+## Phase 8: Task Management & Calendar (331-380)
+- [ ] 331. Create the "Family Tasks" dashboard.
+- [ ] 332. Implement "Create Task" modal (Title, Desc, Assignee, DueDate).
+- [ ] 333. Create Task Categories (Household, Finance, Shopping, Worship).
+- [ ] 334. Implement "Assign to Member" picker.
+- [ ] 335. Create Task Detail view with comments.
+- [ ] 336. Implement "Checklist" within a task.
+- [ ] 337. Build the "Task Status" board (To Do, In Progress, Done).
+- [ ] 338. Implement "Task Reminder" service.
+- [ ] 339. Create "Shared Calendar" UI (Month/Week/Day view).
+- [ ] 340. Integrate Tasks into the Calendar view.
+- [ ] 341. Build "Recurring Tasks" (Daily/Weekly Sholat routines).
+- [ ] 342. Implement "Overdue Task" alerts.
+- [ ] 343. Create "Task Completion Rewards" (Gamification for kids).
+- [ ] 344. Implement "Task History" for auditing.
+- [ ] 345. Build "Shopping List" specialized task view.
+- [ ] 346. Implement "Smart Suggested Tasks" by AI.
+- [ ] 347. Create "Priority Levels" for tasks (Low, Medium, High).
+- [ ] 348. Develop "Collaborative Editing" on task descriptions.
+- [ ] 349. Implement "Task Attachments" (Photos of finished work).
+- [ ] 350. Build "Family Goal" tasks (Shared progress).
+- [ ] 351. Sync Calendar with Google/iCal (Export only).
+- [ ] 352. Implement "Draggable Board" for task status.
+- [ ] 353. Create "Task Templates" (Preparation for Ramadan, etc.).
+- [ ] 354. Implement "Voice Task Entry" via AI Chat.
+- [ ] 355. Setup "Push Notifications" for new assignments.
+- [ ] 356. Build a "Task Leaderboard" for the family.
+- [ ] 357. Implement "Sub-tasks" hierarchy.
+- [ ] 358. Create "Filter by Assignee" UI.
+- [ ] 359. Develop "Private Tasks" (Only for Me).
+- [ ] 360. Implement "Task Estimation" (Time taken).
+- [ ] 361. Build "Weekly Routine" view.
+- [ ] 362. Create "Holiday Planner" module within tasks.
+- [ ] 363. Implement "Task Dependencies" (Task B after Task A).
+- [ ] 364. Setup "Auto-archive" for done tasks after 30 days.
+- [ ] 365. Build "Print Checklist" functionality.
+- [ ] 366. Implement "Color Coding" for calendar events.
+- [ ] 367. Create "Location-based Reminders" (Geofencing - future).
+- [ ] 368. Build "Family Agenda" PDF export.
+- [ ] 369. Implement "Drag & Drop" to reschedule on calendar.
+- [ ] 370. Test Task performance with 100+ active items.
+- [ ] 371. Build "Task Completion" animation (Confetti).
+- [ ] 372. Create "Morning Briefing" email (Today's Tasks).
+- [ ] 373. Implement "Emergency Task" type (SOS).
+- [ ] 374. Build "Family Anniversary/Birthday" tracker in calendar.
+- [ ] 375. Implement "Shared Note" (Wiki) for family info.
+- [ ] 376. Create "Bill Payment Task" linked to Wallets.
+- [ ] 377. Build "Auto-payment" reminders for recurring bills.
+- [ ] 378. Implement "Child Mode" UI for tasks (Kids friendly).
+- [ ] 379. Create "Family Meeting" event type with agenda slots.
+- [ ] 380. Finalize the "Agenda & Tasks" sidebar navigation.
+
+## Phase 9: Dashboard, Reporting & Analytics (381-420)
+- [ ] 381. Implement the Main Dashboard "At a Glance" widgets.
+- [ ] 382. Create "Total Asset" sum calculation.
+- [ ] 383. Build "Monthly Spending Breakdown" chart.
+- [ ] 384. Implement "Income vs Expense" comparison bar chart.
+- [ ] 385. Create "Top Expense Categories" list.
+- [ ] 386. Build a "Recent Transactions" widget on the dashboard.
+- [ ] 387. Implement "Financial Insights" card (Text based advice).
+- [ ] 388. Create "Goal Progress" circular gauges.
+- [ ] 389. Build "Upcoming Bill Payment" widget.
+- [ ] 390. Implement "Weather & Prayer Times" widget.
+- [ ] 391. Create "Drill-down" analytics for details.
+- [ ] 392. Implement "Year-over-Year" growth analysis.
+- [ ] 393. Build "Savings Rate" tracker.
+- [ ] 394. Create "Dynamic Dashboard" (Allow user to move widgets).
+- [ ] 395. Implement "Filter Dashboard by Wallet".
+- [ ] 396. Build a "Heatmap" for spending patterns.
+- [ ] 397. Implement "Anomaly Detection" (Notify on unusual large spent).
+- [ ] 398. Create "Financial Forecast" based on current trend.
+- [ ] 399. Build "Debt-to-Income" ratio widget.
+- [ ] 400. Implement "Net Worth" tracker over time.
+- [ ] 401. Develop the "Report Generator" page.
+- [ ] 402. Implement PDF Export for Monthly Reports.
+- [ ] 403. Implement Excel/CSV Export for deep analysis.
+- [ ] 404. Create "Clean View" for printing.
+- [ ] 405. Build "Automatic Monthly Report" email sender.
+- [ ] 406. Implement "Custom Report" builder (Pick columns).
+- [ ] 407. Create "Tax Preparation" summary.
+- [ ] 408. Build "Subscription Status" widget.
+- [ ] 409. Implement "Dark/Light Mode" toggle in Dashboard.
+- [ ] 410. Optimize Dashboard loading time (Caching widgets).
+- [ ] 411. Build "Family Statistics" (Who spends most?).
+- [ ] 412. Implement "Compare with Previous Period" indicators (%).
+- [ ] 413. Create "Cash-on-hand" vs "Bank" breakdown.
+- [ ] 414. Build "Zakat Paid vs Outstanding" chart.
+- [ ] 415. Implement "Export All Family Data" (GDPR compliance).
+- [ ] 416. Create "Dashboard Mobile View" optimization.
+- [ ] 417. Build "Interactive Tooltips" for all charts.
+- [ ] 418. Implement "Skeleton Loading" for slow charts.
+- [ ] 419. Setup "Real-time Dashboard" refresh via WebSockets.
+- [ ] 420. Finalize the Dashboard Layout and Empty States.
+
+## Phase 10: Non-Functional, Security & Performance (421-460)
+- [ ] 421. Implement HTTPS/SSL for all environments.
+- [ ] 422. Conduct a "Security Audit" for API endpoints.
+- [ ] 423. Implement "Field-level Encryption" for sensitive wallet data.
+- [ ] 424. Setup "WAF" (Web Application Firewall) on Cloud provider.
+- [ ] 425. Configure "DDoS Protection".
+- [ ] 426. Optimize Database query performance with `EXPLAIN ANALYZE`.
+- [ ] 427. Implement "Image Compression" on upload.
+- [ ] 428. Setup "Content Delivery Network" (CDN) for assets.
+- [ ] 429. Implement "Gzip/Brotli" compression for assets.
+- [ ] 430. Conduct "Load Testing" for 1000 concurrent users.
+- [ ] 431. Optimize "Bundle Size" of the React application.
+- [ ] 432. Implement "Code Splitting" and Lazy Loading.
+- [ ] 433. Setup "Service Worker" for PWA offline support.
+- [ ] 434. Create "Manifest.json" for PWA installation.
+- [ ] 435. Implement "Add to Home Screen" prompt UI.
+- [ ] 436. Build "Offline Mode" indicators and sync strategy.
+- [ ] 437. Setup "Database Replica" for read-heavy operations.
+- [ ] 438. Implement "Request ID" tracking for all logs.
+- [ ] 439. Conduct "Accessibility Audit" (Keyboard nav, Screen readers).
+- [ ] 440. Implement "Semantic HTML" across the board.
+- [ ] 441. Setup "SEO Meta Tags" for marketing landing page.
+- [ ] 442. Create "Sitemap.xml" and "Robots.txt".
+- [ ] 443. Implement "Canonical URLs".
+- [ ] 444. Performance: Lazy load Youtube/heavy embeds.
+- [ ] 445. Performance: Use `next/image` for image optimization.
+- [ ] 446. Security: Implement "Content Security Policy" (CSP).
+- [ ] 447. Security: Prevent "SQL Injection" via ORM usage.
+- [ ] 448. Security: Sanitize all AI outputs to prevent XSS.
+- [ ] 449. Security: Implement "Path Traversal" protection.
+- [ ] 450. Security: "Secure Cookies" everywhere (HttpOnly, SameSite).
+- [ ] 451. Privacy: Implement "Kebijakan Privasi" link & agreement.
+- [ ] 452. Privacy: "Data Anonymization" for analytics data.
+- [ ] 453. Performance: Caching API responses with Redis where possible.
+- [ ] 454. Monitoring: Setup "Uptime Robot" monitoring.
+- [ ] 455. Monitoring: Setup "Disk Usage" alerts for DB.
+- [ ] 456. Log: Implement "User Activity Log" for transparency.
+- [ ] 457. Test: Performance on 3G/Slow 4G networks.
+- [ ] 458. Test: Cross-browser compatibility (Chrome, Safari, Firefox, Edge).
+- [ ] 459. Test: Responsive design on Tablet/Foldable phones.
+- [ ] 460. Document Technical Specs for maintenance team.
+
+## Phase 11: QA, Testing & UAT (461-490)
+- [ ] 461. Complete "Unit Test Coverage" for all Utils/Helpers (>80%).
+- [ ] 462. Complete "Unit Test Coverage" for Zakat Engines.
+- [ ] 463. Create "Integration Test Suite" for Core Finance Flow.
+- [ ] 464. Create "End-to-End Test" for Login & Register.
+- [ ] 465. Create "End-to-End Test" for Family Invite flow.
+- [ ] 466. Create "End-to-End Test" for AI Transaction entry.
+- [ ] 467. Conduct "Usability Testing" with real family users.
+- [ ] 468. Fix "Critical Bugs" identified in internal testing.
+- [ ] 469. Perform "Smoke Test" on every new deployment.
+- [ ] 470. Setup "Automated Visual Regression Testing" (optional).
+- [ ] 471. Create "QA Checklist" for new feature releases.
+- [ ] 472. Conduct "Security Pentesting" for common vulnerabilities.
+- [ ] 473. Test "Zakat Calculation" accuracy with 50+ scenarios.
+- [ ] 474. Test "Edge Case" for multi-family joins.
+- [ ] 475. Test "Data Consistency" on slow database writes.
+- [ ] 476. Perform "Stress Test" on AI API concurrency.
+- [ ] 477. Conduct "User Acceptance Testing" (UAT) with stakeholders.
+- [ ] 478. Create "UAT Sign-off" document.
+- [ ] 479. Implement "Bug Report" button within the app.
+- [ ] 480. Setup "Feature Flag" system for controlled rollout (GrowthBook/LaunchDarkly).
+- [ ] 481. Test "Push Notification" delivery on iOS/Android.
+- [ ] 482. Test "Email Formatting" in Outlook, Gmail, Apple Mail.
+- [ ] 483. Perform "Battery Drain" test for mobile PWA usage.
+- [ ] 484. Test "Data Export" with large transaction volumes (10,000+).
+- [ ] 485. Fix "UI Glitches" on small screen phones (SE/Mini).
+- [ ] 486. Conduct "Localization Review" for Indonesian text.
+- [ ] 487. Verify "Islamic Terms" are used correctly (e.g., Nisab, Haul).
+- [ ] 488. Finalize "Help Center" and "Knowledge Base" (KB).
+- [ ] 489. Create "API Reference" for potential future integrations.
+- [ ] 490. Prepare "Change Log" for version 1.0.0.
+
+## Phase 12: Deployment & Post-Launch (491-500)
+- [ ] 491. Finalize "Production Environment" setup on AWS/GCP.
+- [ ] 492. Execute "Production Database Migration".
+- [ ] 493. Warm up "Redis Cache".
+- [ ] 494. Execute "DNS Cutover" to production domain.
+- [ ] 495. Deploy "Landing Page" and Marketing Site.
+- [ ] 496. Release "PWA Version" to Beta testers.
+- [ ] 497. Setup "Google Analytics" and "Search Console".
+- [ ] 498. Conduct "Post-Mortem" meeting for Phase 1.
+- [ ] 499. Launch "Social Media" campaign for Yumna.
+- [ ] 500. **CELEBRATE & Start Sprint for V2.0!** 🚀
+
+---
+*Generated by Yumna AI System Design Analyst*

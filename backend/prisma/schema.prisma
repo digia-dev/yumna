@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  KEPALA_KELUARGA
+  ISTRI
+  ANAK
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String
+  image         String?
+  role          UserRole  @default(ANAK)
+  familyId      String?
+  family        Family?   @relation(fields: [familyId], references: [id])
+  wallets       Wallet[]
+  tasksAssigned Task[]    @relation("AssignedTasks")
+  tasksCreated  Task[]    @relation("CreatedTasks")
+  transactions  Transaction[]
+  notifications Notification[]
+  needsPasswordChange Boolean @default(false)
+  twoFactorEnabled    Boolean @default(false)
+  resetToken    String?   @unique
+  resetTokenExpires DateTime?
+  status        String?
+  statusIcon    String?
+  isFirstLogin  Boolean  @default(true)
+  lastLoginAt   DateTime?
+  lastIp        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  auditLogs     AuditLog[]
+  joinRequests  FamilyJoinRequest[]
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  details   String?
+  ip        String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Family {
+  id          String   @id @default(cuid())
+  name        String
+  currency    String   @default("IDR")
+  members     User[]
+  invitations FamilyInvitation[]
+  joinRequests FamilyJoinRequest[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model FamilyJoinRequest {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  familyId  String
+  family    Family   @relation(fields: [familyId], references: [id])
+  status    RequestStatus @default(PENDING)
+  createdAt DateTime @default(now())
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model FamilyInvitation {
+  id        String   @id @default(cuid())
+  email     String
+  familyId  String
+  family    Family   @relation(fields: [familyId], references: [id])
+  token     String   @unique
+  role      UserRole @default(ANAK)
+  expiresAt DateTime
+  accepted  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Wallet {
+  id          String   @id @default(cuid())
+  name        String
+  balance     Decimal  @default(0) @db.Decimal(20, 2)
+  currency    String   @default("IDR")
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  amount      Decimal  @db.Decimal(20, 2)
+  type        TransactionType
+  category    String
+  description String?
+  date        DateTime @default(now())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  walletId    String
+  wallet      Wallet   @relation(fields: [walletId], references: [id])
+  familyId    String?
+  createdAt   DateTime @default(now())
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  status      TaskStatus @default(PENDING)
+  dueDate     DateTime?
+  assigneeId  String
+  assignee    User      @relation("AssignedTasks", fields: [assigneeId], references: [id])
+  creatorId   String
+  creator     User      @relation("CreatedTasks", fields: [creatorId], references: [id])
+  familyId    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}

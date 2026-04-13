@@ -1,0 +1,14 @@
+{
+  "name": "yumna-root",
+  "private": true,
+  "scripts": {
+    "prepare": "husky",
+    "infra:init": "docker-compose up -d && cd backend && npx prisma migrate dev --name init && npx prisma db seed",
+    "build": "npm run build --prefix backend && npm run build --prefix frontend",
+    "test": "npm run test:e2e --prefix backend",
+    "studio": "cd backend && npx prisma studio"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}
