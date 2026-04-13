@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Query, UseGuards, Req, Param } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -21,9 +21,31 @@ export class ChatController {
   async sendMessage(
     @Req() req: any,
     @Body('message') message: string,
+    @Body('attachmentUrl') attachmentUrl?: string,
   ) {
     const userId = req.user.id;
     const familyId = req.user.familyId;
-    return this.chatService.sendMessage(userId, familyId, message);
+    return this.chatService.sendMessage(userId, familyId, message, attachmentUrl);
+  }
+
+  @Get('pinned')
+  async getPinnedMessages(@Req() req: any) {
+    const familyId = req.user.familyId;
+    return this.chatService.getPinnedMessages(familyId);
+  }
+
+  @Patch('reaction')
+  async toggleReaction(
+    @Req() req: any,
+    @Body('messageId') messageId: string,
+    @Body('emoji') emoji: string,
+  ) {
+    const userId = req.user.id;
+    return this.chatService.toggleReaction(messageId, userId, emoji);
+  }
+
+  @Patch('pin/:id')
+  async togglePin(@Param('id') id: string) {
+    return this.chatService.togglePin(id);
   }
 }

@@ -16,9 +16,13 @@ import {
   Check,
   X,
   Mic,
-  MicOff,
   Wallet,
-  Receipt
+  Receipt,
+  Pin,
+  Smile,
+  Image as ImageIcon,
+  Paperclip,
+  ChevronDown
 } from "lucide-react";
 import useSWRInfinite from "swr/infinite";
 import apiClient from "@/lib/api-client";
@@ -139,7 +143,23 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [showPinned, setShowPinned] = useState(false);
+  const [pinnedMessages, setPinnedMessages] = useState<any[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  // --- Fetch Pinned Messages ---
+  const fetchPinned = async () => {
+    try {
+      const res = await apiClient.get("/chat/pinned");
+      setPinnedMessages(res.data);
+    } catch {};
+  };
+
+  useEffect(() => {
+    fetchPinned();
+  }, []);
 
   // --- Voice Messaging (Task 290) ---
   const startListening = () => {
@@ -196,22 +216,63 @@ export default function ChatPage() {
     }
   }, [messages.length, isSending]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isSending) return;
+  const handleSend = async (messageText?: string, attachmentUrl?: string) => {
+    const textToSend = messageText || input.trim();
+    if (!textToSend && !attachmentUrl || isSending) return;
 
-    const userMessage = input.trim();
     setInput("");
     setIsSending(true);
 
     try {
-      await apiClient.post("/chat/send", { message: userMessage });
+      await apiClient.post("/chat/send", { 
+        message: textToSend || (attachmentUrl ? "Sent an image" : ""), 
+        attachmentUrl 
+      });
       mutate();
     } catch (e) {
       toast.error("Gagal mengirim pesan.");
-      setInput(userMessage);
+      if (textToSend) setInput(textToSend);
     } finally {
       setIsSending(false);
     }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      // Assuming existing upload endpoint
+      const res = await apiClient.post("/uploads", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      await handleSend("", res.data.url);
+      toast.success("Gambar berhasil dikirim.");
+    } catch (err) {
+      toast.error("Gagal mengunggah gambar.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const toggleReaction = async (messageId: string, emoji: string) => {
+    try {
+      await apiClient.patch("/chat/reaction", { messageId, emoji });
+      mutate();
+    } catch {}
+  };
+
+  const togglePin = async (messageId: string) => {
+    try {
+      await apiClient.patch(`/chat/pin/${messageId}`);
+      toast.success("Status pin diperbarui.");
+      mutate();
+      fetchPinned();
+    } catch {}
   };
 
   const confirmTransaction = async (txData: any) => {
@@ -260,11 +321,36 @@ export default function ChatPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-           <Button variant="ghost" size="icon" className="text-emerald-700 rounded-full hover:bg-emerald-50" onClick={() => mutate()}>
+           <Button 
+             variant="ghost" 
+             size="sm" 
+             className={cn("text-emerald-700 rounded-full hover:bg-emerald-50 h-8 text-[10px] font-bold", showPinned && "bg-emerald-100")}
+             onClick={() => setShowPinned(!showPinned)}
+           >
+             <Pin size={14} className="mr-1" />
+             PIN ({pinnedMessages.length})
+           </Button>
+           <Button variant="ghost" size="icon" className="text-emerald-700 rounded-full hover:bg-emerald-50 h-8 w-8" onClick={() => mutate()}>
              <RefreshCcw size={16} />
            </Button>
         </div>
       </div>
+
+      {showPinned && pinnedMessages.length > 0 && (
+        <div className="px-6 py-3 bg-amber-50 rounded-2xl border border-amber-100 animate-in slide-in-from-top-2 duration-300">
+          <p className="text-[10px] font-black text-amber-800 uppercase tracking-widest mb-2 flex items-center gap-2">
+            <Pin size={10} /> Pesan Penting Keluarga
+          </p>
+          <div className="space-y-2 max-h-32 overflow-y-auto pr-2">
+            {pinnedMessages.map(m => (
+              <div key={m.id} className="text-xs bg-white/50 p-2 rounded-lg border border-amber-200/50 flex justify-between items-start">
+                <p className="line-clamp-2">{m.content}</p>
+                <Button variant="ghost" size="sm" className="h-4 p-0 text-[8px]" onClick={() => togglePin(m.id)}>UNPIN</Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Message List */}
       <div 
@@ -287,6 +373,11 @@ export default function ChatPage() {
 
         {messages.map((msg: any, i: number) => {
           const isAI = msg.role === 'assistant';
+          let smartReplies: string[] = [];
+          if (isAI) {
+            const srMatch = msg.content.match(/\[SmartReply:\s*([^\]]+)\]/);
+            if (srMatch) smartReplies = srMatch[1].split('|').map(s => s.trim());
+          }
           // Try to parse message content if it contains JSON for extraction
           let extractionData = null;
           let taskData = null;
@@ -340,10 +431,15 @@ export default function ChatPage() {
                   "prose-strong:text-emerald-800 prose-headings:text-emerald-900"
                 )}>
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {/* Clean up JSON if any for display */}
-                    {extractionData ? msg.content.replace(/\{[\s\S]*\}/, "").trim() || "Saya berhasil mendeteksi transaksi Anda:" : msg.content}
+                    {msg.content.replace(/\{[\s\S]*\}/, "").replace(/\[SmartReply:\s*[^\]]+\]/, "").trim() || (extractionData ? "Saya berhasil mendeteksi transaksi Anda:" : "")}
                   </ReactMarkdown>
                 </div>
+
+                {msg.attachmentUrl && (
+                  <div className="mt-2 rounded-xl overflow-hidden border border-emerald-100">
+                    <img src={msg.attachmentUrl} alt="Attachment" className="max-w-full h-auto object-cover hover:scale-105 transition-transform cursor-pointer" />
+                  </div>
+                )}
 
                 {/* Confirmation Card (Task 288) */}
                 {extractionData && (
@@ -369,6 +465,53 @@ export default function ChatPage() {
                    </span>
                    {isAI && <Check size={8} className="text-emerald-400" />}
                 </div>
+
+                {/* Reaction & Action Row (Task 299 & 300) */}
+                <div className="absolute top-0 right-0 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur rounded-full px-2 py-1 shadow-md border border-slate-100 scale-75 origin-right">
+                  {["👍", "❤️", "🙏", "✅"].map(emoji => (
+                    <button key={emoji} className="hover:scale-125 transition-transform" onClick={() => toggleReaction(msg.id, emoji)}>{emoji}</button>
+                  ))}
+                  <div className="w-px h-3 bg-slate-200 mx-1" />
+                  <button onClick={() => togglePin(msg.id)}>
+                    <Pin size={12} className={cn(msg.isPinned ? "text-amber-500 fill-amber-500" : "text-slate-400")} />
+                  </button>
+                </div>
+
+                {/* Display Current Reactions */}
+                {msg.reactions && Object.keys(msg.reactions).length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {Object.entries(msg.reactions).map(([emoji, users]: [string, any]) => (
+                      <button 
+                        key={emoji} 
+                        onClick={() => toggleReaction(msg.id, emoji)}
+                        className={cn(
+                          "flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] border transition-all",
+                          users.includes(user?.id) ? "bg-emerald-100 border-emerald-200 text-emerald-700 scale-105" : "bg-slate-50 border-slate-100 text-slate-500"
+                        )}
+                      >
+                        <span>{emoji}</span>
+                        <span className="font-bold">{users.length}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Smart Replies (Task 302) */}
+                {smartReplies.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-slate-50">
+                    {smartReplies.map((sr, idx) => (
+                      <Button 
+                        key={idx} 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleSend(sr)}
+                        className="h-8 px-4 rounded-full bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-100/50 text-[10px] font-black uppercase tracking-widest"
+                      >
+                         {sr}
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -386,14 +529,13 @@ export default function ChatPage() {
           <Button 
             variant="ghost" 
             size="icon" 
-            className={cn(
-              "rounded-2xl w-12 h-12 transition-all active:scale-95 shrink-0 shadow-sm",
-              isListening ? "bg-red-50 text-red-600 hover:bg-red-100 animate-pulse" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-            )}
-            onClick={startListening}
+            className="rounded-2xl w-12 h-12 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 shrink-0"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
           >
-            {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+            {uploading ? <Loader2 size={20} className="animate-spin" /> : <ImageIcon size={20} />}
           </Button>
+          <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
 
           <Input 
             value={input}
@@ -404,8 +546,8 @@ export default function ChatPage() {
           />
           
           <Button 
-            onClick={handleSend}
-            disabled={!input.trim() || isSending}
+            onClick={() => handleSend()}
+            disabled={(!input.trim() && !uploading) || isSending}
             className="rounded-2xl h-12 w-12 p-0 bg-emerald-600 hover:bg-emerald-700 transition-all shadow-md active:scale-95 shrink-0 shadow-emerald-900/20"
           >
             {isSending ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
