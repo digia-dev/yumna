@@ -36,6 +36,7 @@ export function WelcomeWalkthrough() {
   useEffect(() => {
     const isFirstTime = !localStorage.getItem("yumna_walkthrough_seen");
     if (isFirstTime) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setOpen(true);
     }
   }, []);
