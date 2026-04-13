@@ -8,7 +8,7 @@ import { OnboardingProgress } from '@/components/onboarding/onboarding-progress'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { AuthLayout } from '@/components/auth/auth-layout'
+import { AuthLayout } from '@/components/layout/auth-layout'
 
 export default function CreateFamilyPage() {
   const [familyName, setFamilyName] = useState('')
