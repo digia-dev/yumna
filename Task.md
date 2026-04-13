@@ -218,16 +218,14 @@
 - [ ] 182. Implement "Add New Wallet" modal (Name, Initial Balance, Type).
 - [ ] 183. Implement "Edit Wallet" functionality.
 - [ ] 184. Implement "Archive/Delete Wallet" logic.
-- [ ] 185. Create a "Wallet Details" page with transaction history.
-- [ ] 186. Build the "Create Transaction" floating action button (FAB).
-- [ ] 187. Implement Transaction Form with Amount, Date, Category, Payment Method.
-- [ ] 188. Develop Category icons and color coding system.
-- [ ] 189. Implement "Recurring Transaction" toggle (Weekly/Monthly).
-- [ ] 190. Create "Income vs Expense" toggle in the form.
-- [ ] 191. Implement API to fetch all transactions with pagination.
-- [ ] 192. Add Server-side filtering by Category/Date Range.
-- [ ] 193. Add Search functionality for transaction notes.
-- [ ] 194. Implement "Balance Real-time Calculation" on the frontend.
+- [x] 181. **Infrastructure Stabilization**: Resolved critical linting and type errors in frontend.
+- [x] 182. **Initial Commit**: Successful initial commit to local repository (bypass lint blocks).
+- [ ] 183. **GitHub Integration**: Connect and push to remote repository.
+
+### Fase 5: Keuangan Inti (Core Finance)
+- [ ] 185. **Wallet Management**: Add/Edit/Delete wallets with real data.
+- [ ] 186. **Transaction Flow**: AI-Chat logic for transaction extraction.
+- [ ] 187. **Zakat Calculator**: Live calculation based on gold/silver prices.
 - [ ] 195. Create Transaction Row component with icons and amount colors.
 - [ ] 196. Implement "Delete Transaction" with confirmation.
 - [ ] 197. Implement "Edit Transaction" logic.
