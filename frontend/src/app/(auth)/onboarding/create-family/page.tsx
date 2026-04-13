@@ -1,31 +1,38 @@
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { Home } from "lucide-react";
-import { OnboardingProgress } from "@/components/onboarding/onboarding-progress";
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import { Home } from 'lucide-react'
+import { OnboardingProgress } from '@/components/onboarding/onboarding-progress'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { AuthLayout } from '@/components/auth/auth-layout'
 
 export default function CreateFamilyPage() {
-  const [familyName, setFamilyName] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const [familyName, setFamilyName] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
   const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!familyName) return;
+    e.preventDefault()
+    if (!familyName) return
 
-    setIsLoading(true);
+    setIsLoading(true)
     try {
       // In production, this would call the API to create family
       // For now, we simulate success and redirect
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      toast.success("Keluarga berhasil dibentuk! Selamat datang di Yumna.");
-      router.push("/dashboard");
-    } catch (error) {
-      toast.error("Gagal membentuk keluarga. Silakan coba lagi.");
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      toast.success('Keluarga berhasil dibentuk! Selamat datang di Yumna.')
+      router.push('/dashboard')
+    } catch {
+      toast.error('Gagal membentuk keluarga. Silakan coba lagi.')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <AuthLayout
@@ -46,17 +53,24 @@ export default function CreateFamilyPage() {
               required
               disabled={isLoading}
             />
-            <Home className="absolute left-3 top-2.5 text-muted-foreground" size={18} />
+            <Home
+              className="text-muted-foreground absolute top-2.5 left-3"
+              size={18}
+            />
           </div>
-          <p className="text-[10px] text-muted-foreground italic">
+          <p className="text-muted-foreground text-[10px] italic">
             *Nama ini akan muncul di dashboard dan laporan bersama.
           </p>
         </div>
 
-        <Button type="submit" className="w-full" disabled={!familyName || isLoading}>
-          {isLoading ? "Membentuk Keluarga..." : "Bangun Pondasi Sekarang"}
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={!familyName || isLoading}
+        >
+          {isLoading ? 'Membentuk Keluarga...' : 'Bangun Pondasi Sekarang'}
         </Button>
       </form>
     </AuthLayout>
-  );
+  )
 }
