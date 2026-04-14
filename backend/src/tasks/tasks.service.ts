@@ -69,7 +69,7 @@ export class TasksService {
       include: {
         assignee: { select: { id: true, name: true, image: true } },
         creator: { select: { id: true, name: true } },
-        bill: { select: { id: true, title: true, amount: true, status: true } },
+        bill: { select: { id: true, name: true, amount: true, isPaid: true } },
       },
       orderBy: { updatedAt: 'desc' },
     });

@@ -246,6 +246,7 @@ export class FinanceController {
   @Get('wealth-breakdown')
   async getWealthBreakdown(@GetUser('familyId') familyId: string) {
     return this.financeService.getWealthBreakdown(familyId);
+  }
 
   @Get('comparative-analytics')
   async getComparativeAnalytics(@GetUser('familyId') familyId: string) {

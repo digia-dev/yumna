@@ -104,7 +104,7 @@ export class ChatService {
     // 2.1 Add Weekly Report context if analytical intent is high (Task 293)
     if (message.toLowerCase().includes('laporan') || message.toLowerCase().includes('analisis') || message.toLowerCase().includes('minggu')) {
        const weeklyData = await this.financeService.getWeeklyAdvisorData(familyId);
-       context += `\n\nLAPORAN MINGGUAN:\nIncome: ${weeklyData.income}\nExpense: ${weeklyData.expense}\nTop Categories: ${weeklyData.topCategories.map((c: any) => `${c.name}: ${c.amount}`).join(', ')}`;
+       context += `\n\nLAPORAN MINGGUAN:\nIncome: ${weeklyData.income}\nExpense: ${weeklyData.expense}\nTop Categories: ${Object.entries(weeklyData.topExpenseCategories).map(([name, amount]) => `${name}: ${amount}`).join(', ')}`;
     }
 
     context += `\n\nSTATUS BARAKAH KELUARGA:\nScore: ${barakah.score}\nLevel: ${barakah.level}\nProgress: ${barakah.progress}%\nNext Level at: ${barakah.nextLevelExp} XP`;

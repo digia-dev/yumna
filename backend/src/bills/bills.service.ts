@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBillDto, UpdateBillDto } from './dto/bill.dto';
 
@@ -9,11 +9,10 @@ export class BillsService {
   async create(familyId: string, dto: CreateBillDto) {
     return this.prisma.bill.create({
       data: {
-        title: dto.title,
-        description: dto.description,
+        name: dto.title,
         amount: dto.amount,
         dueDate: new Date(dto.dueDate),
-        recurrence: dto.recurrence || 'NONE',
+        recurrence: (dto.recurrence as any) || 'NONE',
         category: dto.category || 'Lainnya',
         familyId,
         walletId: dto.walletId,
@@ -53,8 +52,14 @@ export class BillsService {
     return this.prisma.bill.update({
       where: { id },
       data: {
-        ...dto,
+        name: dto.title,
+        amount: dto.amount,
         dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
+        recurrence: dto.recurrence as any,
+        category: dto.category,
+        walletId: dto.walletId,
+        isPaid: dto.isPaid,
+        autoPay: dto.autoPay,
       },
     });
   }
@@ -63,21 +68,25 @@ export class BillsService {
     await this.findOne(id, familyId);
     return this.prisma.bill.update({
       where: { id },
-      data: { isDeleted: true },
+      data: { isDeleted: true, deletedAt: new Date() },
     });
   }
 
   async payBill(id: string, familyId: string, userId: string, amount: number) {
     const bill = await this.findOne(id, familyId);
     
+    if (!bill.walletId) {
+      throw new BadRequestException('Tagihan ini tidak memiliki dompet sumber pembayaran.');
+    }
+
     // Create transaction
     const transaction = await this.prisma.transaction.create({
       data: {
         amount,
         type: 'EXPENSE',
         category: bill.category,
-        description: `Pembayaran tagihan: ${bill.title}`,
-        status: 'COMPLETED',
+        description: `Pembayaran tagihan: ${bill.name}`,
+        status: 'HALAL',
         familyId,
         userId,
         walletId: bill.walletId,
@@ -88,7 +97,7 @@ export class BillsService {
     // Update bill status if fully paid (simple logic for now)
     await this.prisma.bill.update({
       where: { id },
-      data: { status: 'PAID' }
+      data: { isPaid: true }
     });
 
     return transaction;

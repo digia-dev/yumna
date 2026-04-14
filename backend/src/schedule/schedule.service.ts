@@ -36,7 +36,7 @@ export class ScheduleService {
         this.logger.log(`Sending reminder: [${reminder.title}] to family [${reminder.familyId}] for user [${reminder.userId}]`);
         
         // Push message to chat as AI system message (Task 309)
-        const content = `🕒 **PENGINGAT YUMNA**\n\nAssalamu'alaikum, @${reminder.user.name}.\nYumna ingin mengingatkan:\n\n**${reminder.title}**\n${reminder.content || ''}\n\n*Semoga barakah.*`;
+        const content = `🕒 **PENGINGAT YUMNA**\n\nAssalamu'alaikum, @${reminder.user?.name || 'User'}.\nYumna ingin mengingatkan:\n\n**${reminder.title}**\n${reminder.content || ''}\n\n*Semoga barakah.*`;
         
         await this.chatService.sendAiMessage(reminder.familyId, content);
 
@@ -128,7 +128,7 @@ export class ScheduleService {
 
     for (const task of upcomingTasks) {
       try {
-        const message = `⚠️ **PENGINGAT AMANAH**\n\nAssalamu'alaikum, ${task.assignee ? `@${task.assignee.name}` : 'Keluarga'}.\nAda tugas yang mendekati batas waktu:\n\n**${task.title}**\nBatas: ${task.dueDate.toLocaleString('id-ID')}\n\n*Semangat mengerjakannya!*`;
+        const message = `⚠️ **PENGINGAT AMANAH**\n\nAssalamu'alaikum, ${task.assignee ? `@${task.assignee.name}` : 'Keluarga'}.\nAda tugas yang mendekati batas waktu:\n\n**${task.title}**\nBatas: ${task.dueDate?.toLocaleString('id-ID') || 'N/A'}\n\n*Semangat mengerjakannya!*`;
         
         await this.chatService.sendAiMessage(task.familyId, message);
 
@@ -160,7 +160,7 @@ export class ScheduleService {
 
     for (const task of overdueTasks) {
       try {
-        const message = `🚨 **AMANAH TERLEWAT (OVERDUE)**\n\nAssalamu'alaikum, ${task.assignee ? `@${task.assignee.name}` : 'Keluarga'}.\nTugas ini sudah melewati batas waktu:\n\n**${task.title}**\nBatas: ${task.dueDate.toLocaleString('id-ID')}\n\n*Yuk, segera diselesaikan demi keberkahan.*`;
+        const message = `🚨 **AMANAH TERLEWAT (OVERDUE)**\n\nAssalamu'alaikum, ${task.assignee ? `@${task.assignee.name}` : 'Keluarga'}.\nTugas ini sudah melewati batas waktu:\n\n**${task.title}**\nBatas: ${task.dueDate?.toLocaleString('id-ID') || 'N/A'}\n\n*Yuk, segera diselesaikan demi keberkahan.*`;
         
         await this.chatService.sendAiMessage(task.familyId, message);
       } catch (err) {

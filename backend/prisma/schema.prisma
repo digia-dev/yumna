@@ -151,6 +151,10 @@ model Bill {
   wallet       Wallet?        @relation("WalletBills", fields: [walletId], references: [id])
   tasks        Task[]         @relation("BillTasks")
   transactions Transaction[]  @relation("BillTransactions")
+  
+  isDeleted    Boolean        @default(false)
+  deletedAt    DateTime?
+
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 }
@@ -239,7 +243,6 @@ model Task {
   checklists      TaskChecklistItem[]
   comments        TaskComment[]
   attachments     TaskAttachment[]
-  dueReminderSent Boolean             @default(false)
   // Hierarchy (Task 357)
   parentId        String?
   parent          Task?               @relation("SubTasks", fields: [parentId], references: [id])
@@ -258,6 +261,12 @@ model Task {
   // Integration (Task 376, 377)
   billId          String?
   bill            Bill?               @relation("BillTasks", fields: [billId], references: [id])
+
+  // Recurrence & Reminders
+  recurrence      RecurrenceType      @default(NONE)
+  dueReminderSent Boolean             @default(false)
+  lastEditedById  String?
+  lastEditedAt    DateTime?
 
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt

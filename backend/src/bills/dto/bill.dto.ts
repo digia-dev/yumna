@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsDateString, IsEnum } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsDateString, IsEnum, IsBoolean } from 'class-validator';
 import { RecurrenceType } from '@prisma/client';
 
 export class CreateBillDto {
@@ -15,6 +15,14 @@ export class CreateBillDto {
 
   @IsDateString()
   dueDate: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isPaid?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  autoPay?: boolean;
 
   @IsEnum(RecurrenceType)
   @IsOptional()
@@ -44,6 +52,14 @@ export class UpdateBillDto {
   @IsDateString()
   @IsOptional()
   dueDate?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isPaid?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  autoPay?: boolean;
 
   @IsEnum(RecurrenceType)
   @IsOptional()
