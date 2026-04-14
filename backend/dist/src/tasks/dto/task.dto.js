@@ -11,11 +11,13 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateTaskDto = exports.CreateTaskDto = void 0;
 const class_validator_1 = require("class-validator");
+const client_1 = require("@prisma/client");
 class CreateTaskDto {
     title;
     description;
     dueDate;
     priority;
+    category;
     assigneeId;
 }
 exports.CreateTaskDto = CreateTaskDto;
@@ -35,10 +37,15 @@ __decorate([
     __metadata("design:type", String)
 ], CreateTaskDto.prototype, "dueDate", void 0);
 __decorate([
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsEnum)(client_1.TaskPriority),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateTaskDto.prototype, "priority", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateTaskDto.prototype, "category", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
@@ -47,9 +54,10 @@ __decorate([
 class UpdateTaskDto {
     title;
     description;
-    isCompleted;
+    status;
     dueDate;
     priority;
+    category;
     assigneeId;
 }
 exports.UpdateTaskDto = UpdateTaskDto;
@@ -64,20 +72,25 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateTaskDto.prototype, "description", void 0);
 __decorate([
-    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsEnum)(client_1.TaskStatus),
     (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", Boolean)
-], UpdateTaskDto.prototype, "isCompleted", void 0);
+    __metadata("design:type", String)
+], UpdateTaskDto.prototype, "status", void 0);
 __decorate([
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateTaskDto.prototype, "dueDate", void 0);
 __decorate([
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsEnum)(client_1.TaskPriority),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateTaskDto.prototype, "priority", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateTaskDto.prototype, "category", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),

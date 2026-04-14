@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, UseGuards, Query, Param } from '@nestjs/common';
 import { BudgetingService } from './budgeting.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
@@ -23,5 +23,13 @@ export class BudgetingController {
     @Body() body: { category: string; amount: number; period: string },
   ) {
     return this.budgetingService.setBudget(familyId, body.category, body.amount, body.period);
+  }
+
+  @Delete(':id')
+  async deleteBudget(
+    @GetUser('familyId') familyId: string,
+    @Param('id') id: string,
+  ) {
+    return this.budgetingService.deleteBudget(familyId, id);
   }
 }

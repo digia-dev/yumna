@@ -20,10 +20,20 @@ export class ReligiService {
 
   // Khatam Tracker
   async updateKhatam(userId: string, juz: number) {
-    return this.prisma.quranKhatam.upsert({
-      where: { id: userId }, // Simplified: 1 active khatam per user
-      update: { currentJuz: juz, isCompleted: juz === 30 },
-      create: { userId, currentJuz: juz, isCompleted: juz === 30 }
+    const active = await this.prisma.quranKhatam.findFirst({
+      where: { userId, isCompleted: false },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    if (active) {
+      return this.prisma.quranKhatam.update({
+        where: { id: active.id },
+        data: { currentJuz: juz, isCompleted: juz === 30 }
+      });
+    }
+
+    return this.prisma.quranKhatam.create({
+      data: { userId, currentJuz: juz, isCompleted: juz === 30 }
     });
   }
 
@@ -46,6 +56,52 @@ export class ReligiService {
     return this.prisma.prayerLog.create({
       data: { userId, prayerName, isOnTime }
     });
+  }
+
+  // Get Summary (Streaks, XP, etc)
+  async getSummary(userId: string, familyId: string) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const habits = await this.prisma.islamicHabit.findMany({
+      where: { userId, createdAt: { gte: today } }
+    });
+
+    const khatam = await this.prisma.quranKhatam.findFirst({
+      where: { userId, isCompleted: false },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const points = await this.prisma.islamicHabit.count({ where: { userId } }) * 10 
+                 + await this.prisma.prayerLog.count({ where: { userId } }) * 5;
+
+    // Family habits for leaderboard
+    const familyMembers = await this.prisma.user.findMany({
+      where: { familyId },
+      include: {
+        prayerLogs: { where: { createdAt: { gte: today } } }
+      }
+    });
+
+    const scoreboard = familyMembers.map(m => ({
+      name: m.name,
+      progress: Math.min(100, (m.prayerLogs.length / 5) * 100),
+      level: this.getLevelName(m.prayerLogs.length)
+    }));
+
+    return {
+      tahajjudStreak: 7, // Placeholder logic for now
+      currentJuz: khatam?.currentJuz || 0,
+      habits: habits.map(h => h.name),
+      familyXP: points,
+      scoreboard
+    };
+  }
+
+  private getLevelName(prayerCount: number) {
+    if (prayerCount >= 5) return 'Prajurit Surga';
+    if (prayerCount >= 3) return 'Pejuang Sholat';
+    return 'Penghafal Muda';
   }
 
   // Islamic Events

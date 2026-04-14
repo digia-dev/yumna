@@ -73,6 +73,15 @@ export class ZakatController {
     return this.zakatService.calculateFidyah(body.days);
   }
 
+  @Post('pay')
+  async distribute(
+    @GetUser('id') userId: string,
+    @GetUser('familyId') familyId: string,
+    @Body() body: any,
+  ) {
+    return this.zakatService.distributeZakat(userId, familyId, body);
+  }
+
   @Post('log')
   async logPayment(
     @GetUser('familyId') familyId: string,

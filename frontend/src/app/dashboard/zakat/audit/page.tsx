@@ -13,11 +13,21 @@ import {
   ShieldCheck,
   TrendingUp,
   Coins,
-  ArrowLeft
+  ArrowLeft,
+  Plus
 } from "lucide-react";
 import Link from "next/link";
 import apiClient from "@/lib/api-client";
 import { formatCurrency } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter 
+} from "@/components/ui/dialog";
 
 const fetcher = (url: string) => apiClient.get(url).then(res => res.data);
 
@@ -25,11 +35,33 @@ export default function ZakatAuditPage() {
   const { data: history } = useSWR("/zakat/history", fetcher);
   const { data: wallets } = useSWR("/finance/wallets", fetcher);
   const { data: nisab } = useSWR("/zakat/nisab", fetcher);
+  const { data: waqafList, mutate: mutateWaqaf } = useSWR("/zakat/waqaf", fetcher);
+
+  const [showAddWaqaf, setShowAddWaqaf] = useState(false);
+  const [newWaqaf, setNewWaqaf] = useState({ name: "", targetAmount: "", type: "TUNAI" });
+  const [loading, setLoading] = useState(false);
+
+  const handleAddWaqaf = async () => {
+    if (!newWaqaf.name || !newWaqaf.targetAmount) return;
+    try {
+      setLoading(true);
+      await apiClient.post("/zakat/waqaf", newWaqaf);
+      toast.success("Rencana Sadaqah Jariyah ditambahkan.");
+      mutateWaqaf();
+      setShowAddWaqaf(false);
+      setNewWaqaf({ name: "", targetAmount: "", type: "TUNAI" });
+    } catch (e) {
+      toast.error("Gagal menambah rencana.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const totalAssets = wallets?.reduce((acc: number, w: any) => acc + Number(w.balance), 0) || 0;
   const totalZakatPaid = history?.reduce((acc: number, h: any) => acc + Number(h.amount), 0) || 0;
 
   return (
+    <>
     <div className="space-y-6 pb-20">
       <div className="flex items-center gap-4">
         <Link href="/dashboard/zakat">
@@ -41,7 +73,7 @@ export default function ZakatAuditPage() {
           <h1 className="text-3xl font-bold tracking-tight">Audit Keuangan Zakat</h1>
           <p className="text-muted-foreground">Laporan ketaatan zakat dan kesucian harta tahunan.</p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => window.print()}>
           <Download size={16} />
           Export PDF
         </Button>
@@ -117,46 +149,45 @@ export default function ZakatAuditPage() {
                   </div>
                   <div>
                     <h4 className="font-semibold text-sm">Zakat Profesi Teratur</h4>
-                    <p className="text-xs text-muted-foreground">Penyetoran bulanan Anda terpantau konsisten 92%.</p>
+                    <p className="text-xs text-muted-foreground">Penyetoran bulanan Anda terpantau konsisten.</p>
                   </div>
                </div>
             </CardContent>
          </Card>
 
-         <Card>
+          <Card>
             <CardHeader>
               <CardTitle className="text-lg">Sadaqah Jariyah Planner</CardTitle>
               <CardDescription>Rencana amal yang pahalanya terus mengalir.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-               <div className="space-y-3">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="font-medium">Waqaf Sumur / Air</span>
-                    <Badge>Planned</Badge>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div className="bg-primary h-2 rounded-full w-[45%]" />
-                  </div>
-                  <p className="text-[10px] text-muted-foreground">Terkumpul: Rp 4.500.000 / Rp 10.000.000</p>
-               </div>
+               {(waqafList && waqafList.length > 0) ? waqafList.map((w: any) => (
+                 <div key={w.id} className="space-y-3">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="font-medium">{w.name}</span>
+                      <Badge variant={w.isCompleted ? "default" : "secondary"}>
+                         {w.isCompleted ? "Tercapai" : "Planned"}
+                      </Badge>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div className={`bg-primary h-2 rounded-full`} style={{ width: `${Math.min(100, (Number(w.amount) / Number(w.targetAmount || w.amount)) * 100)}%` }} />
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">
+                      Terkumpul: Rp {Number(w.amount).toLocaleString()} / Rp {(w.targetAmount || w.amount).toLocaleString()}
+                    </p>
+                 </div>
+               )) : (
+                 <div className="py-8 text-center text-muted-foreground italic text-xs">
+                    Belum ada rencana waqaf yang tercatat.
+                 </div>
+               )}
 
-               <div className="space-y-3">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="font-medium">Pembangunan Masjid</span>
-                    <Badge variant="secondary">Active</Badge>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div className="bg-primary h-2 rounded-full w-[20%]" />
-                  </div>
-                  <p className="text-[10px] text-muted-foreground">Terkumpul: Rp 2.000.000 / Rp 10.000.000</p>
-               </div>
-
-               <Button className="w-full bg-secondary hover:bg-secondary/90 text-white">
+               <Button className="w-full bg-secondary hover:bg-secondary/90 text-white" onClick={() => setShowAddWaqaf(true)}>
                  <TrendingUp size={16} className="mr-2" />
                  Tambah Target Jariyah
                </Button>
             </CardContent>
-         </Card>
+          </Card>
       </div>
 
       <Card>
@@ -172,5 +203,32 @@ export default function ZakatAuditPage() {
         </CardContent>
       </Card>
     </div>
+
+    <Dialog open={showAddWaqaf} onOpenChange={setShowAddWaqaf}>
+       <DialogContent>
+          <DialogHeader>
+             <DialogTitle className="text-2xl font-black uppercase tracking-tighter flex items-center gap-2">
+                <Plus className="text-secondary" />
+                Target Sadaqah Jariyah Baru
+             </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+             <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Nama Program (e.g. Bangun Sumur)</label>
+                <Input value={newWaqaf.name} onChange={(e) => setNewWaqaf({...newWaqaf, name: e.target.value})} />
+             </div>
+             <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-slate-500 tracking-widest">Target Nominal (IDR)</label>
+                <Input type="number" value={newWaqaf.targetAmount} onChange={(e) => setNewWaqaf({...newWaqaf, targetAmount: e.target.value})} />
+             </div>
+          </div>
+          <DialogFooter>
+             <Button className="w-full bg-secondary hover:bg-secondary/90 h-12 font-black uppercase tracking-widest" onClick={handleAddWaqaf} disabled={loading}>
+                {loading ? "Menyimpan..." : "Simpan Program"}
+             </Button>
+          </DialogFooter>
+       </DialogContent>
+    </Dialog>
+    </>
   );
 }

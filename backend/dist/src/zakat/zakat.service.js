@@ -95,6 +95,25 @@ let ZakatService = ZakatService_1 = class ZakatService {
             },
         });
     }
+    async distributeZakat(userId, familyId, data) {
+        await this.prisma.transaction.create({
+            data: {
+                userId,
+                familyId,
+                walletId: data.walletId,
+                amount: data.amount,
+                type: 'EXPENSE',
+                category: 'Zakat & Infaq',
+                description: `Penyaluran ${data.type} ke ${data.recipient}`,
+                date: new Date(),
+            }
+        });
+        await this.prisma.wallet.update({
+            where: { id: data.walletId },
+            data: { balance: { decrement: data.amount } }
+        });
+        return this.logZakatPayment(familyId, data.amount, data.type, data.recipient, data.notes);
+    }
     async getZakatHistory(familyId) {
         return this.prisma.zakatLog.findMany({
             where: { familyId },

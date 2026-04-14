@@ -300,4 +300,50 @@ export declare class FinanceController {
     deleteTransaction(id: string, familyId: string): Promise<{
         success: boolean;
     }>;
+    getSavingsGoals(familyId: string): Promise<{
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        familyId: string;
+        targetAmount: import("@prisma/client-runtime-utils").Decimal;
+        currentAmount: import("@prisma/client-runtime-utils").Decimal;
+        deadline: Date | null;
+    }[]>;
+    createSavingsGoal(familyId: string, dto: any): Promise<{
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        familyId: string;
+        targetAmount: import("@prisma/client-runtime-utils").Decimal;
+        currentAmount: import("@prisma/client-runtime-utils").Decimal;
+        deadline: Date | null;
+    }>;
+    updateSavingsGoal(id: string, familyId: string, dto: any): Promise<{
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        familyId: string;
+        targetAmount: import("@prisma/client-runtime-utils").Decimal;
+        currentAmount: import("@prisma/client-runtime-utils").Decimal;
+        deadline: Date | null;
+    }>;
+    deleteSavingsGoal(id: string, familyId: string): Promise<{
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        familyId: string;
+        targetAmount: import("@prisma/client-runtime-utils").Decimal;
+        currentAmount: import("@prisma/client-runtime-utils").Decimal;
+        deadline: Date | null;
+    }>;
+    getWealthBreakdown(familyId: string): Promise<{
+        name: any;
+        val: number;
+        color: any;
+        amount: number;
+    }[]>;
 }

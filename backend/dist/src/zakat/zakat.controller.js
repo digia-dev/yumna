@@ -66,6 +66,9 @@ let ZakatController = class ZakatController {
     async calculateFidyah(body) {
         return this.zakatService.calculateFidyah(body.days);
     }
+    async distribute(userId, familyId, body) {
+        return this.zakatService.distributeZakat(userId, familyId, body);
+    }
     async logPayment(familyId, dto) {
         return this.zakatService.logZakatPayment(familyId, dto.amount, dto.type, dto.recipient, dto.notes);
     }
@@ -140,6 +143,15 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], ZakatController.prototype, "calculateFidyah", null);
+__decorate([
+    (0, common_1.Post)('pay'),
+    __param(0, (0, get_user_decorator_1.GetUser)('id')),
+    __param(1, (0, get_user_decorator_1.GetUser)('familyId')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:returntype", Promise)
+], ZakatController.prototype, "distribute", null);
 __decorate([
     (0, common_1.Post)('log'),
     __param(0, (0, get_user_decorator_1.GetUser)('familyId')),

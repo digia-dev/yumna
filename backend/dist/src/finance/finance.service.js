@@ -8,15 +8,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FinanceService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const client_1 = require("@prisma/client");
+const gamification_service_1 = require("../gamification/gamification.service");
 let FinanceService = class FinanceService {
     prisma;
-    constructor(prisma) {
+    gamificationService;
+    constructor(prisma, gamificationService) {
         this.prisma = prisma;
+        this.gamificationService = gamificationService;
     }
     async getWallets(familyId) {
         return this.prisma.wallet.findMany({
@@ -142,7 +148,11 @@ let FinanceService = class FinanceService {
                     where: { id: data.savingsGoalId },
                     data: { currentAmount: { increment: goalChange } },
                 });
+                if (data.type === client_1.TransactionType.INCOME) {
+                    await this.gamificationService.addPoints(familyId, 50, 'Menyisihkan uang untuk tujuan masa depan.');
+                }
             }
+            await this.gamificationService.addPoints(familyId, 10, 'Mencatat transaksi keluarga.');
             return transaction;
         });
     }
@@ -481,6 +491,56 @@ let FinanceService = class FinanceService {
             where: { id, familyId },
         });
     }
+    async getWealthBreakdown(familyId) {
+        const wallets = await this.prisma.wallet.findMany({
+            where: { familyId, isDeleted: false },
+            select: { type: true, balance: true }
+        });
+        const breakdown = {
+            'CASH': 0,
+            'BANK': 0,
+            'INVESTMENT': 0,
+            'GOLD': 0,
+            'OTHER': 0
+        };
+        let total = 0;
+        wallets.forEach(w => {
+            const type = w.type || 'OTHER';
+            const balance = Number(w.balance);
+            breakdown[type] = (breakdown[type] || 0) + balance;
+            total += balance;
+        });
+        if (total === 0)
+            return [];
+        return Object.entries(breakdown)
+            .filter(([_, value]) => value > 0)
+            .map(([name, value]) => ({
+            name: this.getWalletTypeName(name),
+            val: Math.round((value / total) * 100),
+            color: this.getWalletTypeColor(name),
+            amount: value
+        }));
+    }
+    getWalletTypeName(type) {
+        const names = {
+            'CASH': 'Kas & Tabungan',
+            'BANK': 'Rekening Bank',
+            'INVESTMENT': 'Investasi/Saham',
+            'GOLD': 'Emas & Perhiasan',
+            'OTHER': 'Lainnya'
+        };
+        return names[type] || type;
+    }
+    getWalletTypeColor(type) {
+        const colors = {
+            'CASH': 'bg-emerald-500',
+            'BANK': 'bg-blue-500',
+            'INVESTMENT': 'bg-purple-500',
+            'GOLD': 'bg-amber-400',
+            'OTHER': 'bg-slate-400'
+        };
+        return colors[type] || 'bg-slate-400';
+    }
     async createDebt(familyId, data) {
         return this.prisma.debt.create({
             data: {
@@ -602,32 +662,62 @@ let FinanceService = class FinanceService {
             income,
             expense,
             balance: income - expense,
-            topCategories: this.calculateTopCategories(transactions),
-            budgetUsage: budgets.map(b => ({
-                category: b.category,
-                limit: Number(b.amount),
-                spent: transactions.filter(t => t.category === b.category && t.type === 'EXPENSE').reduce((sum, t) => sum + Number(t.amount), 0)
-            })),
-            savingsProgress: savings.map(s => ({
-                name: s.name,
-                progress: (Number(s.currentAmount) / Number(s.targetAmount)) * 100
-            }))
+            topExpenseCategories: this.calculateCategoryBreakdown(transactions.filter(t => t.type === 'EXPENSE')),
+            savingsProgress: savings.map(s => ({ name: s.name, progress: Number(s.currentAmount) / Number(s.targetAmount) }))
         };
     }
-    calculateTopCategories(transactions) {
-        const categories = {};
-        transactions.filter(t => t.type === 'EXPENSE').forEach(t => {
-            categories[t.category] = (categories[t.category] || 0) + Number(t.amount);
+    calculateCategoryBreakdown(transactions) {
+        const breakdown = {};
+        transactions.forEach(t => {
+            breakdown[t.category] = (breakdown[t.category] || 0) + Number(t.amount);
         });
-        return Object.entries(categories)
-            .map(([name, amount]) => ({ name, amount }))
-            .sort((a, b) => b.amount - a.amount)
-            .slice(0, 3);
+        return breakdown;
+    }
+    async getSavingsGoals(familyId) {
+        return this.prisma.savingsGoal.findMany({
+            where: { familyId },
+            orderBy: { createdAt: 'desc' },
+        });
+    }
+    async createSavingsGoal(familyId, data) {
+        return this.prisma.savingsGoal.create({
+            data: {
+                ...data,
+                deadline: data.deadline ? new Date(data.deadline) : null,
+                familyId,
+            },
+        });
+    }
+    async updateSavingsGoal(id, familyId, data) {
+        return this.prisma.savingsGoal.update({
+            where: { id, familyId },
+            data: {
+                ...data,
+                deadline: data.deadline ? new Date(data.deadline) : undefined,
+            },
+        });
+    }
+    async deleteSavingsGoal(id, familyId) {
+        return this.prisma.savingsGoal.delete({
+            where: { id, familyId },
+        });
+    }
+    async addFundsToGoal(userId, familyId, goalId, walletId, amount) {
+        return this.createTransaction(userId, familyId, {
+            walletId,
+            amount,
+            type: client_1.TransactionType.EXPENSE,
+            category: 'Savings',
+            description: `Alokasi dana ke Saving Goal`,
+            savingsGoalId: goalId,
+        });
     }
 };
 exports.FinanceService = FinanceService;
 exports.FinanceService = FinanceService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __param(1, (0, common_1.Inject)((0, common_1.forwardRef)(() => gamification_service_1.GamificationService))),
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        gamification_service_1.GamificationService])
 ], FinanceService);
 //# sourceMappingURL=finance.service.js.map

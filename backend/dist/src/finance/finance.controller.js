@@ -107,6 +107,21 @@ let FinanceController = class FinanceController {
     async deleteTransaction(id, familyId) {
         return this.financeService.deleteTransaction(id, familyId);
     }
+    async getSavingsGoals(familyId) {
+        return this.financeService.getSavingsGoals(familyId);
+    }
+    async createSavingsGoal(familyId, dto) {
+        return this.financeService.createSavingsGoal(familyId, dto);
+    }
+    async updateSavingsGoal(id, familyId, dto) {
+        return this.financeService.updateSavingsGoal(id, familyId, dto);
+    }
+    async deleteSavingsGoal(id, familyId) {
+        return this.financeService.deleteSavingsGoal(id, familyId);
+    }
+    async getWealthBreakdown(familyId) {
+        return this.financeService.getWealthBreakdown(familyId);
+    }
 };
 exports.FinanceController = FinanceController;
 __decorate([
@@ -318,6 +333,45 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], FinanceController.prototype, "deleteTransaction", null);
+__decorate([
+    (0, common_1.Get)('savings-goals'),
+    __param(0, (0, get_user_decorator_1.GetUser)('familyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], FinanceController.prototype, "getSavingsGoals", null);
+__decorate([
+    (0, common_1.Post)('savings-goals'),
+    __param(0, (0, get_user_decorator_1.GetUser)('familyId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], FinanceController.prototype, "createSavingsGoal", null);
+__decorate([
+    (0, common_1.Put)('savings-goals/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, get_user_decorator_1.GetUser)('familyId')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:returntype", Promise)
+], FinanceController.prototype, "updateSavingsGoal", null);
+__decorate([
+    (0, common_1.Delete)('savings-goals/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, get_user_decorator_1.GetUser)('familyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], FinanceController.prototype, "deleteSavingsGoal", null);
+__decorate([
+    (0, common_1.Get)('wealth-breakdown'),
+    __param(0, (0, get_user_decorator_1.GetUser)('familyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], FinanceController.prototype, "getWealthBreakdown", null);
 exports.FinanceController = FinanceController = __decorate([
     (0, common_1.Controller)('finance'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),

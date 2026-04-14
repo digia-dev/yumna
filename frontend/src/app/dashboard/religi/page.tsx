@@ -18,7 +18,8 @@ import {
   Flame,
   Award,
   ChevronRight,
-  Utensils
+  Utensils,
+  Loader2
 } from "lucide-react";
 import useSWR from "swr";
 import apiClient from "@/lib/api-client";
@@ -27,11 +28,42 @@ import { toast } from "sonner";
 const fetcher = (url: string) => apiClient.get(url).then(res => res.data);
 
 export default function ReligiHubPage() {
-  const { data: userData } = useSWR("/auth/me", fetcher);
-  const [activeTab, setActiveTab] = useState("overview");
+  const { data: summary, mutate: mutateSummary, isLoading } = useSWR("/religi/summary", fetcher);
+  const { data: events } = useSWR("/religi/events", fetcher);
+  
   const [dzikirCount, setDzikirCount] = useState(0);
   const [dzikirTarget, setDzikirTarget] = useState(33);
   const [dzikirPhrase, setDzikirPhrase] = useState("Subhanallah");
+  const [loadingAction, setLoadingAction] = useState(false);
+
+  const logHabit = async (name: string) => {
+    try {
+      setLoadingAction(true);
+      await apiClient.post("/religi/habit", { name });
+      toast.success(`${name} tercatat. Barakallah!`);
+      mutateSummary();
+    } catch (e) {
+      toast.error("Gagal mencatat habit.");
+    } finally {
+      setLoadingAction(false);
+    }
+  };
+
+  const updateKhatam = async (juz: number) => {
+    try {
+      await apiClient.post("/religi/khatam", { juz });
+      toast.success(`Progress khatam diperbarui ke Juz ${juz}.`);
+      mutateSummary();
+    } catch (e) {
+      toast.error("Gagal memperbarui khatam.");
+    }
+  };
+
+  if (isLoading) return (
+    <div className="flex justify-center items-center h-64">
+      <Loader2 className="animate-spin text-primary" size={40} />
+    </div>
+  );
 
   return (
     <div className="space-y-6 pb-20">
@@ -67,7 +99,7 @@ export default function ReligiHubPage() {
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="text-[10px] font-bold uppercase text-emerald-800 tracking-wider">Streak Tahajjud</p>
-                      <h4 className="text-2xl font-bold text-emerald-950 mt-1">12 Hari</h4>
+                      <h4 className="text-2xl font-bold text-emerald-950 mt-1">{summary?.tahajjudStreak || 0} Hari</h4>
                     </div>
                     <Flame className="text-amber-500" size={20} />
                   </div>
@@ -79,7 +111,7 @@ export default function ReligiHubPage() {
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="text-[10px] font-bold uppercase text-blue-800 tracking-wider">Progress Khatam</p>
-                      <h4 className="text-2xl font-bold text-blue-950 mt-1">Juz 18</h4>
+                      <h4 className="text-2xl font-bold text-blue-950 mt-1">Juz {summary?.currentJuz || 0}</h4>
                     </div>
                     <BookOpen className="text-blue-500" size={20} />
                   </div>
@@ -90,8 +122,8 @@ export default function ReligiHubPage() {
                 <CardContent className="pt-6">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-[10px] font-bold uppercase text-purple-800 tracking-wider">Poin Keluarga</p>
-                      <h4 className="text-2xl font-bold text-purple-950 mt-1">2,450 XP</h4>
+                      <p className="text-[10px] font-bold uppercase text-purple-800 tracking-wider">XP Keluarga</p>
+                      <h4 className="text-2xl font-bold text-purple-950 mt-1">{summary?.familyXP || 0} XP</h4>
                     </div>
                     <Award className="text-purple-500" size={20} />
                   </div>
@@ -119,23 +151,22 @@ export default function ReligiHubPage() {
                  </CardHeader>
                  <CardContent>
                     <div className="space-y-4">
-                       {[
-                         { date: '1 Ramadhan', title: 'Awal Puasa Ramadhan', color: 'bg-emerald-100 text-emerald-700' },
-                         { date: '17 Ramadhan', title: 'Nuzulul Quran', color: 'bg-emerald-50 text-emerald-600' },
-                         { date: '1 Syawal', title: 'Hari Raya Idul Fitri', color: 'bg-amber-100 text-amber-700' },
-                         { date: '9 Dzulhijjah', title: 'Puasa Arafah', color: 'bg-blue-100 text-blue-700' },
-                       ].map((ev, i) => (
+                       {events && events.length > 0 ? events.map((ev: any, i: number) => (
                          <div key={i} className="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors border border-transparent hover:border-border">
-                            <div className={`w-20 text-center py-2 rounded-lg font-bold text-xs ${ev.color}`}>
-                               {ev.date}
+                            <div className={`w-20 text-center py-2 rounded-lg font-bold text-xs bg-emerald-100 text-emerald-700`}>
+                               {new Date(ev.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
                             </div>
                             <div className="flex-1">
                                <h5 className="text-sm font-semibold">{ev.title}</h5>
-                               <p className="text-[10px] text-muted-foreground italic">Momen ketaatan dan kebersamaan keluarga.</p>
+                               <p className="text-[10px] text-muted-foreground italic">{ev.description || "Momen ketaatan dan kebersamaan keluarga."}</p>
                             </div>
                             <ChevronRight size={16} className="text-muted-foreground" />
                          </div>
-                       ))}
+                       )) : (
+                         <div className="text-center py-8 text-muted-foreground italic text-xs">
+                            Belum ada agenda religi terdekat.
+                         </div>
+                       )}
                     </div>
                  </CardContent>
               </Card>
@@ -170,24 +201,27 @@ export default function ReligiHubPage() {
              <CardContent className="space-y-6">
                 <div className="space-y-2">
                    <div className="flex justify-between items-center text-sm">
-                      <span className="font-semibold text-primary">Progress Saat Ini: Juz 18</span>
-                      <span className="text-muted-foreground">60%</span>
+                      <span className="font-semibold text-primary">Progress Saat Ini: Juz {summary?.currentJuz || 0}</span>
+                      <span className="text-muted-foreground">{Math.round(((summary?.currentJuz || 0) / 30) * 100)}%</span>
                    </div>
-                   <Progress value={60} className="h-3" />
+                   <Progress value={((summary?.currentJuz || 0) / 30) * 100} className="h-3" />
                 </div>
                 
                 <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
                    {Array.from({length: 30}).map((_, i) => (
                      <div 
                        key={i} 
-                       className={`aspect-square rounded-md flex items-center justify-center text-[10px] font-bold border ${i+1 <= 18 ? 'bg-emerald-100 border-emerald-200 text-emerald-700' : 'bg-muted/50 border-border text-muted-foreground'}`}
+                       onClick={() => updateKhatam(i + 1)}
+                       className={`aspect-square rounded-md flex items-center justify-center text-[10px] font-bold border cursor-pointer hover:scale-110 transition-transform ${i+1 <= (summary?.currentJuz || 0) ? 'bg-emerald-100 border-emerald-200 text-emerald-700' : 'bg-muted/50 border-border text-muted-foreground'}`}
                      >
                        {i+1}
                      </div>
                    ))}
                 </div>
 
-                <Button className="w-full">Update Progress (Lanjut Juz 19)</Button>
+                <Button className="w-full" onClick={() => updateKhatam((summary?.currentJuz || 0) + 1)} disabled={(summary?.currentJuz || 0) >= 30}>
+                   Update Progress (Lanjut Juz {(summary?.currentJuz || 0) + 1})
+                </Button>
              </CardContent>
            </Card>
         </TabsContent>
@@ -202,30 +236,21 @@ export default function ReligiHubPage() {
                     <div className="flex items-center gap-3">
                       <Utensils className="text-amber-600" size={24} />
                       <div>
-                        <h4 className="font-bold text-amber-900">Besok Kamis!</h4>
-                        <p className="text-xs text-amber-700">Waktunya Puasa Sunnah Senin-Kamis.</p>
+                        <h4 className="font-bold text-amber-900">Niat Puasa?</h4>
+                        <p className="text-xs text-amber-700">Catat ibadah puasa Anda hari ini.</p>
                       </div>
                     </div>
-                    <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white">Niat Puasa</Button>
+                    <div className="flex gap-2">
+                        <Button size="sm" variant="outline" onClick={() => logHabit("Puasa Sunnah")}>Sunnah</Button>
+                        <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white" onClick={() => logHabit("Puasa Wajib")}>Wajib</Button>
+                    </div>
                 </div>
 
                 <div className="space-y-3">
                    <h5 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4">Riwayat Terakhir</h5>
-                   {[
-                     { name: 'Puasa Ayyamul Bidh', date: '14-15 Syawal', status: 'Selesai' },
-                     { name: 'Hutang Puasa (Qadha)', date: '10 Syawal', status: 'Selesai' },
-                   ].map((p, i) => (
-                     <div key={i} className="flex justify-between items-center p-3 border rounded-xl">
-                        <div className="flex items-center gap-3">
-                           <CheckCircle2 className="text-emerald-500" size={16} />
-                           <div>
-                              <p className="text-sm font-semibold">{p.name}</p>
-                              <p className="text-[10px] text-muted-foreground">{p.date}</p>
-                           </div>
-                        </div>
-                        <Badge variant="outline" className="text-[10px]">{p.status}</Badge>
-                     </div>
-                   ))}
+                   <div className="text-center py-8 text-muted-foreground italic text-xs">
+                      Fitur riwayat puasa detail segera hadir.
+                   </div>
                 </div>
              </CardContent>
            </Card>
@@ -246,15 +271,25 @@ export default function ReligiHubPage() {
                 ].map((h, i) => (
                    <div key={i} className="flex items-center justify-between p-4 border rounded-2xl group hover:border-primary transition-colors">
                       <div className="flex items-center gap-4">
-                         <div className="p-2 bg-muted rounded-xl text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                         <div className={`p-2 rounded-xl transition-colors ${summary?.habits?.includes(h.name) ? 'bg-primary text-white' : 'bg-muted text-primary group-hover:bg-primary group-hover:text-white'}`}>
                             {h.icon}
                          </div>
                          <div>
                             <h5 className="font-semibold text-sm">{h.name}</h5>
-                            <p className="text-[10px] text-muted-foreground">Dilakukan hari ini</p>
+                            <p className="text-[10px] text-muted-foreground">
+                               {summary?.habits?.includes(h.name) ? "Sudah dilakukan hari ini" : "Tertata rapih dalam niat"}
+                            </p>
                          </div>
                       </div>
-                      <Button size="sm" variant="ghost" className="text-xs font-bold text-primary">{h.xp}</Button>
+                      <Button 
+                        size="sm" 
+                        variant={summary?.habits?.includes(h.name) ? "outline" : "ghost"} 
+                        className="text-xs font-bold text-primary"
+                        onClick={() => logHabit(h.name)}
+                        disabled={loadingAction || summary?.habits?.includes(h.name)}
+                      >
+                         {summary?.habits?.includes(h.name) ? "Selesai" : h.xp}
+                      </Button>
                    </div>
                 ))}
              </CardContent>
@@ -271,6 +306,7 @@ export default function ReligiHubPage() {
                      setDzikirCount(prev => prev >= dzikirTarget ? 0 : prev + 1);
                      if (dzikirCount + 1 === dzikirTarget) {
                         toast.success("Barakallah! Target dzikir tercapai.");
+                        logHabit(`Dzikir ${dzikirPhrase} ${dzikirTarget}x`);
                      }
                    }}
                 >
@@ -298,7 +334,12 @@ export default function ReligiHubPage() {
                    <p className="text-xs font-medium text-muted-foreground uppercase">Target Sesi</p>
                    <p className="text-lg font-bold">{dzikirTarget}x</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => setDzikirCount(0)}>Reset</Button>
+                <div className="flex gap-2">
+                   <Select value={dzikirTarget.toString()} onValueChange={(v) => { setDzikirTarget(Number(v)); setDzikirCount(0); }}>
+                      {[33, 99, 100, 1000].map(v => <option key={v} value={v}>{v}</option>)}
+                   </Select>
+                   <Button variant="outline" size="sm" onClick={() => setDzikirCount(0)}>Reset</Button>
+                </div>
              </CardContent>
            </Card>
         </TabsContent>
@@ -308,39 +349,40 @@ export default function ReligiHubPage() {
              <CardHeader>
                <CardTitle className="flex items-center gap-2">
                  < Award size={20} className="text-amber-500" />
-                 Papan Skor Sholat Anak (Gamified)
+                 Papan Skor Sholat Keluarga (Live)
                </CardTitle>
                <CardDescription>Beri apresiasi atas setiap sujud mereka.</CardDescription>
              </CardHeader>
              <CardContent className="space-y-6">
-                {[
-                  { name: 'Aisyah', level: 'Prajurit Surga', progress: 85, avatar: 'A' },
-                  { name: 'Hasan', level: 'Penghafal Quran Muda', progress: 45, avatar: 'H' },
-                ].map((child, i) => (
+                {summary?.scoreboard?.map((child: any, i: number) => (
                   <div key={i} className="p-4 border rounded-2xl bg-gradient-to-r from-amber-50/50 to-transparent">
                      <div className="flex items-center gap-4 mb-4">
                         <div className="w-12 h-12 rounded-full bg-amber-200 flex items-center justify-center font-bold text-amber-700 text-xl border-2 border-white shadow-sm">
-                           {child.avatar}
+                           {child.name.charAt(0)}
                         </div>
                         <div className="flex-1">
                            <h4 className="font-bold text-emerald-950">{child.name}</h4>
                            <p className="text-xs text-amber-700 font-medium">{child.level}</p>
                         </div>
                         <div className="text-right">
-                           <p className="text-lg font-bold text-emerald-900">{child.progress}%</p>
+                           <p className="text-lg font-bold text-emerald-900">{Math.round(child.progress)}%</p>
                            <p className="text-[10px] text-muted-foreground uppercase">Kepatuhan Sholat</p>
                         </div>
                      </div>
                      <Progress value={child.progress} className="h-2 bg-amber-200" />
                      <div className="flex justify-between mt-4">
                         <div className="flex gap-1">
+                           {/* Log prayer shortcuts for family member? (Admin only) */}
                            {['S', 'D', 'A', 'M', 'I'].map(p => (
-                             <div key={p} className="w-6 h-6 rounded-md bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
+                             <div 
+                                key={p} 
+                                className={`w-6 h-6 rounded-md text-white text-[10px] font-bold flex items-center justify-center shadow-sm cursor-pointer hover:scale-110 ${child.progress > 0 ? 'bg-emerald-500' : 'bg-slate-300'}`}
+                             >
                                {p}
                              </div>
                            ))}
                         </div>
-                        <Button size="sm" variant="outline" className="h-7 text-[10px] border-amber-300 text-amber-800">Beri Hadiah</Button>
+                        <Button size="sm" variant="outline" className="h-7 text-[10px] border-amber-300 text-amber-800">Detail Laporan</Button>
                      </div>
                   </div>
                 ))}
@@ -349,5 +391,18 @@ export default function ReligiHubPage() {
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+// Simple Select replacement if UI component doesn't match
+function Select({ value, onValueChange, children }: { value: string; onValueChange: (v: string) => void; children: React.ReactNode }) {
+  return (
+    <select 
+      value={value} 
+      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onValueChange(e.target.value)}
+      className="bg-white border rounded px-2 text-xs font-bold"
+    >
+      {children}
+    </select>
   );
 }

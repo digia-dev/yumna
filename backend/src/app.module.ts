@@ -19,7 +19,11 @@ import { MailModule } from './mail/mail.module';
 import { UsersModule } from './users/users.module';
 import { AiModule } from './ai/ai.module';
 import { ReligiModule } from './religi/religi.module';
+import { SyuraModule } from './syura/syura.module';
 import { ChatModule } from './chat/chat.module';
+import { ScheduleModule } from './schedule/schedule.module';
+import { GamificationModule } from './gamification/gamification.module';
+import { BillsModule } from './bills/bills.module';
 
 @Module({
   imports: [
@@ -36,6 +40,7 @@ import { ChatModule } from './chat/chat.module';
     ZakatModule,
     FinanceModule,
     TasksModule,
+    BillsModule,
     ThrottlerModule.forRoot([{
       ttl: 60000,
       limit: 10,
@@ -48,7 +53,10 @@ import { ChatModule } from './chat/chat.module';
     UsersModule,
     AiModule,
     ReligiModule,
+    SyuraModule,
     ChatModule,
+    ScheduleModule,
+    GamificationModule,
   ],
   controllers: [AppController, HealthController],
   providers: [

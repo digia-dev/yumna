@@ -48,4 +48,28 @@ export class ChatController {
   async togglePin(@Param('id') id: string) {
     return this.chatService.togglePin(id);
   }
+
+  @Get('export')
+  async exportHistory(@Req() req: any) {
+    const familyId = req.user.familyId;
+    return this.chatService.exportHistory(familyId);
+  }
+
+  @Post('delete')
+  async deleteMessage(
+    @Req() req: any,
+    @Body('messageId') messageId: string,
+  ) {
+    const userId = req.user.id;
+    const familyId = req.user.familyId;
+    return this.chatService.deleteMessage(messageId, userId, familyId);
+  }
+
+  @Post('translate')
+  async translateMessage(
+    @Body('messageId') messageId: string,
+    @Body('targetLang') targetLang?: string,
+  ) {
+    return this.chatService.translateMessage(messageId, targetLang);
+  }
 }

@@ -38,6 +38,24 @@ export declare class ZakatService {
         recipient: string | null;
         notes: string | null;
     }>;
+    distributeZakat(userId: string, familyId: string, data: {
+        walletId: string;
+        amount: number;
+        type: string;
+        recipient: string;
+        notes?: string;
+    }): Promise<{
+        id: string;
+        createdAt: Date;
+        familyId: string;
+        type: string;
+        amount: import("@prisma/client-runtime-utils").Decimal;
+        date: Date;
+        nisabAtTime: import("@prisma/client-runtime-utils").Decimal;
+        goldPrice: import("@prisma/client-runtime-utils").Decimal;
+        recipient: string | null;
+        notes: string | null;
+    }>;
     getZakatHistory(familyId: string): Promise<{
         id: string;
         createdAt: Date;

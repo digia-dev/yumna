@@ -1,10 +1,15 @@
-import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { TransactionType } from '@prisma/client';
+import { GamificationService } from '../gamification/gamification.service';
 
 @Injectable()
 export class FinanceService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(forwardRef(() => GamificationService))
+    private gamificationService: GamificationService,
+  ) {}
 
   /**
    * Get all wallets for a specific family
@@ -180,7 +185,6 @@ export class FinanceService {
         }
       }
 
-      // Update Savings Goal if linked
       if (data.savingsGoalId) {
         // Simple logic: Income increases goal, Expense decreases it
         const goalChange = data.type === TransactionType.INCOME ? data.amount : -data.amount;
@@ -188,7 +192,15 @@ export class FinanceService {
           where: { id: data.savingsGoalId },
           data: { currentAmount: { increment: goalChange } },
         });
+
+        // Task 328: Add points for saving
+        if (data.type === TransactionType.INCOME) {
+          await this.gamificationService.addPoints(familyId, 50, 'Menyisihkan uang untuk tujuan masa depan.');
+        }
       }
+
+      // Task 328: points for recording
+      await this.gamificationService.addPoints(familyId, 10, 'Mencatat transaksi keluarga.');
 
       return transaction;
     });
@@ -648,6 +660,65 @@ export class FinanceService {
   }
 
   /**
+   * Get Wealth Breakdown for Zakat Hub
+   */
+  async getWealthBreakdown(familyId: string) {
+    const wallets = await this.prisma.wallet.findMany({
+      where: { familyId, isDeleted: false },
+      select: { type: true, balance: true }
+    });
+
+    const breakdown: Record<string, number> = {
+      'CASH': 0,
+      'BANK': 0,
+      'INVESTMENT': 0,
+      'GOLD': 0,
+      'OTHER': 0
+    };
+
+    let total = 0;
+    wallets.forEach(w => {
+      const type = w.type || 'OTHER';
+      const balance = Number(w.balance);
+      breakdown[type] = (breakdown[type] || 0) + balance;
+      total += balance;
+    });
+
+    if (total === 0) return [];
+
+    return Object.entries(breakdown)
+      .filter(([_, value]) => value > 0)
+      .map(([name, value]) => ({
+        name: this.getWalletTypeName(name),
+        val: Math.round((value / total) * 100),
+        color: this.getWalletTypeColor(name),
+        amount: value
+      }));
+  }
+
+  private getWalletTypeName(type: string) {
+    const names: any = {
+      'CASH': 'Kas & Tabungan',
+      'BANK': 'Rekening Bank',
+      'INVESTMENT': 'Investasi/Saham',
+      'GOLD': 'Emas & Perhiasan',
+      'OTHER': 'Lainnya'
+    };
+    return names[type] || type;
+  }
+
+  private getWalletTypeColor(type: string) {
+    const colors: any = {
+      'CASH': 'bg-emerald-500',
+      'BANK': 'bg-blue-500',
+      'INVESTMENT': 'bg-purple-500',
+      'GOLD': 'bg-amber-400',
+      'OTHER': 'bg-slate-400'
+    };
+    return colors[type] || 'bg-slate-400';
+  }
+
+  /**
    * Debt & Receivable Management
    */
   async createDebt(familyId: string, data: { personName: string; amount: number; type: any; description?: string; dueDate?: Date }) {
@@ -798,27 +869,108 @@ export class FinanceService {
       income,
       expense,
       balance: income - expense,
-      topCategories: this.calculateTopCategories(transactions),
-      budgetUsage: budgets.map(b => ({
-        category: b.category,
-        limit: Number(b.amount),
-        spent: transactions.filter(t => t.category === b.category && t.type === 'EXPENSE').reduce((sum, t) => sum + Number(t.amount), 0)
-      })),
-      savingsProgress: savings.map(s => ({
-        name: s.name,
-        progress: (Number(s.currentAmount) / Number(s.targetAmount)) * 100
-      }))
+      topExpenseCategories: this.calculateCategoryBreakdown(transactions.filter(t => t.type === 'EXPENSE')),
+      savingsProgress: savings.map(s => ({ name: s.name, progress: Number(s.currentAmount) / Number(s.targetAmount) }))
     };
   }
 
-  private calculateTopCategories(transactions: any[]) {
-    const categories: Record<string, number> = {};
-    transactions.filter(t => t.type === 'EXPENSE').forEach(t => {
-      categories[t.category] = (categories[t.category] || 0) + Number(t.amount);
+  private calculateCategoryBreakdown(transactions: any[]) {
+    const breakdown: Record<string, number> = {};
+    transactions.forEach(t => {
+      breakdown[t.category] = (breakdown[t.category] || 0) + Number(t.amount);
     });
-    return Object.entries(categories)
-      .map(([name, amount]) => ({ name, amount }))
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, 3);
+    return breakdown;
+  }
+
+  /**
+   * Savings Goals CRUD
+   */
+  async getSavingsGoals(familyId: string) {
+    return this.prisma.savingsGoal.findMany({
+      where: { familyId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async createSavingsGoal(familyId: string, data: { name: string; targetAmount: number; deadline?: string }) {
+    return this.prisma.savingsGoal.create({
+      data: {
+        ...data,
+        deadline: data.deadline ? new Date(data.deadline) : null,
+        familyId,
+      },
+    });
+  }
+
+  async updateSavingsGoal(id: string, familyId: string, data: any) {
+    return this.prisma.savingsGoal.update({
+      where: { id, familyId },
+      data: {
+        ...data,
+        deadline: data.deadline ? new Date(data.deadline) : undefined,
+      },
+    });
+  }
+
+  async deleteSavingsGoal(id: string, familyId: string) {
+    return this.prisma.savingsGoal.delete({
+      where: { id, familyId },
+    });
+  }
+
+  /**
+   * Add funds to savings goal via transaction
+   */
+  async addFundsToGoal(userId: string, familyId: string, goalId: string, walletId: string, amount: number) {
+     return this.createTransaction(userId, familyId, {
+        walletId,
+        amount,
+        type: TransactionType.EXPENSE,
+        category: 'Savings',
+        description: `Alokasi dana ke Saving Goal`,
+        savingsGoalId: goalId,
+      });
+  }
+
+  /**
+   * Get comparative spending analytics (Current vs Previous Month)
+   */
+  async getComparativeAnalytics(familyId: string) {
+    const now = new Date();
+    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+
+    const currentTotal = await this.prisma.transaction.aggregate({
+      where: { 
+        familyId, 
+        type: TransactionType.EXPENSE, 
+        date: { gte: currentMonthStart }, 
+        isDeleted: false 
+      },
+      _sum: { amount: true },
+    });
+
+    const prevTotal = await this.prisma.transaction.aggregate({
+      where: { 
+        familyId, 
+        type: TransactionType.EXPENSE, 
+        date: { gte: prevMonthStart, lte: prevMonthEnd }, 
+        isDeleted: false 
+      },
+      _sum: { amount: true },
+    });
+
+    const currentVal = Number(currentTotal._sum.amount || 0);
+    const prevVal = Number(prevTotal._sum.amount || 0);
+    const diff = currentVal - prevVal;
+    const percent = prevVal > 0 ? (diff / prevVal) * 100 : 0;
+
+    return {
+      currentMonth: currentVal,
+      prevMonth: prevVal,
+      diff,
+      percent: Math.round(percent * 10) / 10,
+    };
   }
 }

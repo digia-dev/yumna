@@ -1,15 +1,15 @@
 import Link from "next/link";
-import { Home, Wallet, MessageSquare, CheckSquare, Settings, Sparkles } from "lucide-react";
+import { Home, Wallet, MessageSquare, CheckSquare, Settings, Sparkles, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 
 const navItems = [
   { label: "Beranda", icon: Home, href: "/dashboard" },
   { label: "Dompet", icon: Wallet, href: "/dashboard/wallets" },
-  { label: "Yumna AI", icon: MessageSquare, href: "/dashboard/chat" },
+  { label: "Agenda", icon: Calendar, href: "/dashboard/calendar" },
   { label: "Tugas", icon: CheckSquare, href: "/dashboard/tasks" },
+  { label: "Yumna AI", icon: MessageSquare, href: "/dashboard/chat" },
   { label: "Islami", icon: Sparkles, href: "/dashboard/islamic-tools" },
-  { label: "Setelan", icon: Settings, href: "/dashboard/settings" },
 ];
 
 export function BottomNav() {

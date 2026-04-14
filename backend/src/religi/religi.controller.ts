@@ -37,4 +37,12 @@ export class ReligiController {
   async getEvents() {
     return this.religiService.getEvents();
   }
+
+  @Get('summary')
+  async getSummary(
+    @GetUser('id') userId: string,
+    @GetUser('familyId') familyId: string,
+  ) {
+    return this.religiService.getSummary(userId, familyId);
+  }
 }

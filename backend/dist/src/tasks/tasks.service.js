@@ -22,14 +22,16 @@ let TasksService = class TasksService {
             data: {
                 title: dto.title,
                 description: dto.description,
+                priority: dto.priority,
+                category: dto.category || 'Lainnya',
                 dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
                 assigneeId: dto.assigneeId || null,
                 creatorId,
                 familyId,
             },
             include: {
-                assignee: { select: { name: true } },
-                creator: { select: { name: true } },
+                assignee: { select: { id: true, name: true, image: true } },
+                creator: { select: { id: true, name: true } },
             },
         });
     }
@@ -37,8 +39,8 @@ let TasksService = class TasksService {
         return this.prisma.task.findMany({
             where: { familyId, isDeleted: false },
             include: {
-                assignee: { select: { name: true } },
-                creator: { select: { name: true } },
+                assignee: { select: { id: true, name: true, image: true } },
+                creator: { select: { id: true, name: true } },
             },
             orderBy: { createdAt: 'desc' },
         });
@@ -51,7 +53,13 @@ let TasksService = class TasksService {
             throw new common_1.NotFoundException('Task not found');
         return this.prisma.task.update({
             where: { id: taskId },
-            data: dto,
+            data: {
+                ...dto,
+                dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
+            },
+            include: {
+                assignee: { select: { id: true, name: true, image: true } },
+            }
         });
     }
     async remove(taskId, familyId) {

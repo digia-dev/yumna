@@ -28,7 +28,10 @@ const mail_module_1 = require("./mail/mail.module");
 const users_module_1 = require("./users/users.module");
 const ai_module_1 = require("./ai/ai.module");
 const religi_module_1 = require("./religi/religi.module");
+const syura_module_1 = require("./syura/syura.module");
 const chat_module_1 = require("./chat/chat.module");
+const schedule_module_1 = require("./schedule/schedule.module");
+const gamification_module_1 = require("./gamification/gamification.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -60,7 +63,10 @@ exports.AppModule = AppModule = __decorate([
             users_module_1.UsersModule,
             ai_module_1.AiModule,
             religi_module_1.ReligiModule,
+            syura_module_1.SyuraModule,
             chat_module_1.ChatModule,
+            schedule_module_1.ScheduleModule,
+            gamification_module_1.GamificationModule,
         ],
         controllers: [app_controller_1.AppController, app_health_controller_1.HealthController],
         providers: [

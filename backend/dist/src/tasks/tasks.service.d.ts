@@ -5,9 +5,12 @@ export declare class TasksService {
     constructor(prisma: PrismaService);
     create(creatorId: string, familyId: string, dto: CreateTaskDto): Promise<{
         assignee: {
+            id: string;
             name: string;
+            image: string | null;
         } | null;
         creator: {
+            id: string;
             name: string;
         };
     } & {
@@ -18,17 +21,22 @@ export declare class TasksService {
         familyId: string;
         isDeleted: boolean;
         deletedAt: Date | null;
+        category: string | null;
         description: string | null;
         title: string;
         dueDate: Date | null;
+        priority: import("@prisma/client").$Enums.TaskPriority;
         assigneeId: string | null;
         creatorId: string;
     }>;
     findAll(familyId: string): Promise<({
         assignee: {
+            id: string;
             name: string;
+            image: string | null;
         } | null;
         creator: {
+            id: string;
             name: string;
         };
     } & {
@@ -39,13 +47,21 @@ export declare class TasksService {
         familyId: string;
         isDeleted: boolean;
         deletedAt: Date | null;
+        category: string | null;
         description: string | null;
         title: string;
         dueDate: Date | null;
+        priority: import("@prisma/client").$Enums.TaskPriority;
         assigneeId: string | null;
         creatorId: string;
     })[]>;
     update(taskId: string, familyId: string, dto: UpdateTaskDto): Promise<{
+        assignee: {
+            id: string;
+            name: string;
+            image: string | null;
+        } | null;
+    } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -53,9 +69,11 @@ export declare class TasksService {
         familyId: string;
         isDeleted: boolean;
         deletedAt: Date | null;
+        category: string | null;
         description: string | null;
         title: string;
         dueDate: Date | null;
+        priority: import("@prisma/client").$Enums.TaskPriority;
         assigneeId: string | null;
         creatorId: string;
     }>;
@@ -67,9 +85,11 @@ export declare class TasksService {
         familyId: string;
         isDeleted: boolean;
         deletedAt: Date | null;
+        category: string | null;
         description: string | null;
         title: string;
         dueDate: Date | null;
+        priority: import("@prisma/client").$Enums.TaskPriority;
         assigneeId: string | null;
         creatorId: string;
     }>;

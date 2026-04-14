@@ -136,6 +136,34 @@ export class ZakatService {
   }
 
   /**
+   * Handle Zakat distribution (Transaction + Log)
+   */
+  async distributeZakat(userId: string, familyId: string, data: { walletId: string, amount: number, type: string, recipient: string, notes?: string }) {
+    // 1. Create Expense Transaction
+    await this.prisma.transaction.create({
+      data: {
+        userId,
+        familyId,
+        walletId: data.walletId,
+        amount: data.amount,
+        type: 'EXPENSE',
+        category: 'Zakat & Infaq',
+        description: `Penyaluran ${data.type} ke ${data.recipient}`,
+        date: new Date(),
+      }
+    });
+
+    // 2. Update Wallet Balance
+    await this.prisma.wallet.update({
+      where: { id: data.walletId },
+      data: { balance: { decrement: data.amount } }
+    });
+
+    // 3. Log to Zakat History
+    return this.logZakatPayment(familyId, data.amount, data.type, data.recipient, data.notes);
+  }
+
+  /**
    * Get Zakat logs for a family
    */
   async getZakatHistory(familyId: string) {

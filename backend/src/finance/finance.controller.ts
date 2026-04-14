@@ -211,4 +211,44 @@ export class FinanceController {
   ) {
     return this.financeService.deleteTransaction(id, familyId);
   }
+
+  // --- Savings Goals ---
+  @Get('savings-goals')
+  async getSavingsGoals(@GetUser('familyId') familyId: string) {
+    return this.financeService.getSavingsGoals(familyId);
+  }
+
+  @Post('savings-goals')
+  async createSavingsGoal(
+    @GetUser('familyId') familyId: string,
+    @Body() dto: any,
+  ) {
+    return this.financeService.createSavingsGoal(familyId, dto);
+  }
+
+  @Put('savings-goals/:id')
+  async updateSavingsGoal(
+    @Param('id') id: string,
+    @GetUser('familyId') familyId: string,
+    @Body() dto: any,
+  ) {
+    return this.financeService.updateSavingsGoal(id, familyId, dto);
+  }
+
+  @Delete('savings-goals/:id')
+  async deleteSavingsGoal(
+    @Param('id') id: string,
+    @GetUser('familyId') familyId: string,
+  ) {
+    return this.financeService.deleteSavingsGoal(id, familyId);
+  }
+
+  @Get('wealth-breakdown')
+  async getWealthBreakdown(@GetUser('familyId') familyId: string) {
+    return this.financeService.getWealthBreakdown(familyId);
+
+  @Get('comparative-analytics')
+  async getComparativeAnalytics(@GetUser('familyId') familyId: string) {
+    return this.financeService.getComparativeAnalytics(familyId);
+  }
 }

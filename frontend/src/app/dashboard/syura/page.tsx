@@ -7,20 +7,88 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from "@/components/ui/dialog";
+import { 
   Users, 
   Plus, 
   Calendar, 
   MessageSquare, 
   CheckCircle2, 
   Target, 
-  ArrowLeft 
+  ArrowLeft,
+  Loader2,
+  CheckCircle,
+  Circle
 } from "lucide-react";
 import Link from "next/link";
+import useSWR from "swr";
+import apiClient from "@/lib/api-client";
 import { toast } from "sonner";
 
+const fetcher = (url: string) => apiClient.get(url).then(res => res.data);
+
 export default function SyuraNotesPage() {
-  const [showForm, setShowForm] = useState(false);
+  const { data: notes, mutate: mutateNotes, isLoading: loadingNotes } = useSWR("/syura/notes", fetcher);
+  const { data: topics, mutate: mutateTopics } = useSWR("/syura/topics", fetcher);
   
+  const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [newNote, setNewNote] = useState({
+    title: "",
+    content: "",
+    attendees: "" // comma separated
+  });
+
+  const [newTopic, setNewTopic] = useState("");
+
+  const handleCreateNote = async () => {
+    if (!newNote.title || !newNote.content) {
+      toast.error("Judul dan isi notulen wajib diisi.");
+      return;
+    }
+    try {
+      setLoading(true);
+      await apiClient.post("/syura/notes", {
+        ...newNote,
+        attendees: newNote.attendees.split(",").map(s => s.trim()).filter(s => s)
+      });
+      toast.success("Notulen berhasil disimpan.");
+      mutateNotes();
+      setShowForm(false);
+      setNewNote({ title: "", content: "", attendees: "" });
+    } catch (e) {
+      toast.error("Gagal menyimpan notulen.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddTopic = async () => {
+    if (!newTopic) return;
+    try {
+      await apiClient.post("/syura/topics", { title: newTopic });
+      toast.success("Topik musyawarah ditambahkan.");
+      mutateTopics();
+      setNewTopic("");
+    } catch (e) {
+      toast.error("Gagal menambah topik.");
+    }
+  };
+
+  const toggleTopic = async (id: string) => {
+    try {
+      await apiClient.patch(`/syura/topics/${id}`);
+      mutateTopics();
+    } catch (e) {
+      toast.error("Gagal update status topik.");
+    }
+  };
+
   return (
     <div className="space-y-6 pb-20">
       <div className="flex items-center gap-4">
@@ -33,7 +101,7 @@ export default function SyuraNotesPage() {
           <h1 className="text-3xl font-bold tracking-tight">Syura Keuangan Keluarga</h1>
           <p className="text-muted-foreground italic">"Dan (bagi) orang-orang yang menerima seruan Tuhan dan mendirikan shalat, sedang urusan mereka (diputuskan) dengan musyawarah..." (Asy-Syura: 38)</p>
         </div>
-        <Button onClick={() => setShowForm(true)} className="gap-2 bg-emerald-700">
+        <Button onClick={() => setShowForm(true)} className="gap-2 bg-emerald-deep hover:bg-emerald-900 border-none">
           <Plus size={16} />
           Notulen Baru
         </Button>
@@ -46,50 +114,46 @@ export default function SyuraNotesPage() {
                Riwayat Musyawarah
             </h3>
             
-            <Card className="border-l-4 border-l-emerald-500">
-               <CardHeader className="pb-2">
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="text-base font-bold">Rapat Anggaran Ramadhan & Lebaran</CardTitle>
-                    <Badge variant="outline">10 Mar 2026</Badge>
-                  </div>
-               </CardHeader>
-               <CardContent className="space-y-4 text-sm">
-                  <div>
-                    <h5 className="font-medium text-xs text-muted-foreground uppercase mb-1 underline">Keputusan Utama:</h5>
-                    <ul className="list-disc pl-4 space-y-1">
-                      <li>Mengalokasikan dana darurat untuk zakat fitrah 1 keluarga.</li>
-                      <li>Membatasi pengeluaran buka puasa luar maksimal 2 kali sebulan.</li>
-                      <li>Target tabungan Qurban 2026 ditingkatkan 15%.</li>
-                    </ul>
-                  </div>
-                  <div className="flex -space-x-2">
-                     {['Ayah', 'Ibu', 'Aisyah'].map(m => (
-                       <div key={m} title={m} className="w-8 h-8 rounded-full bg-primary/10 border-2 border-white flex items-center justify-center text-[10px] font-bold">
-                         {m[0]}
-                       </div>
-                     ))}
-                  </div>
-               </CardContent>
-            </Card>
-
-            <Card className="border-l-4 border-l-amber-400">
-               <CardHeader className="pb-2">
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="text-base font-bold">Evaluasi Budget Bulanan</CardTitle>
-                    <Badge variant="outline">01 Feb 2026</Badge>
-                  </div>
-               </CardHeader>
-               <CardContent className="space-y-4 text-sm">
-                  <div>
-                    <h5 className="font-medium text-xs text-muted-foreground uppercase mb-1 underline">Keputusan Utama:</h5>
-                    <p>Fokus pelunasan hutang jangka pendek (Kartu Kredit / Paylater) sebelum masuk bulan Sya'ban.</p>
-                  </div>
-               </CardContent>
-            </Card>
+            {loadingNotes ? (
+              <div className="flex justify-center py-10">
+                 <Loader2 className="animate-spin text-primary" size={32} />
+              </div>
+            ) : (notes && notes.length > 0) ? (
+              notes.map((note: any) => (
+                <Card key={note.id} className="border-l-4 border-l-emerald-500 hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="text-base font-bold">{note.title}</CardTitle>
+                      <Badge variant="outline" className="text-[10px]">{new Date(note.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4 text-sm">
+                    <div className="whitespace-pre-line text-muted-foreground leading-relaxed">
+                      {note.content}
+                    </div>
+                    {note.attendees.length > 0 && (
+                      <div className="pt-4 border-t flex flex-wrap gap-2">
+                         <span className="text-[10px] font-bold uppercase text-muted-foreground self-center mr-1">Peserta:</span>
+                         {note.attendees.map((m: string, i: number) => (
+                           <Badge key={i} variant="secondary" className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-[10px]">
+                              {m}
+                           </Badge>
+                         ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="py-20 text-center bg-muted/20 border-2 border-dashed rounded-2xl flex flex-col items-center">
+                 <Users size={40} className="text-muted-foreground/30 mb-2" />
+                 <p className="text-sm text-muted-foreground">Belum ada riwayat syura. Mulailah musyawarah untuk keberkahan keluarga.</p>
+              </div>
+            )}
          </div>
 
          <div className="space-y-6">
-            <Card className="bg-primary/5 border-none">
+            <Card className="bg-primary/5 border-none shadow-sm">
                <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
                     <Target size={18} className="text-primary" />
@@ -97,23 +161,37 @@ export default function SyuraNotesPage() {
                   </CardTitle>
                </CardHeader>
                <CardContent className="space-y-4">
-                  <div className="p-3 bg-white rounded-xl border flex gap-3">
-                     <CheckCircle2 size={16} className="text-muted-foreground" />
-                     <span className="text-xs">Rencana Pendidikan Anak (Tahun Ajaran Baru)</span>
+                  <div className="space-y-2">
+                     {topics?.map((t: any) => (
+                       <div key={t.id} className="p-3 bg-white rounded-xl border flex items-center justify-between group">
+                          <div className="flex items-center gap-3">
+                             <div className="cursor-pointer" onClick={() => toggleTopic(t.id)}>
+                                {t.isCompleted ? <CheckCircle size={16} className="text-emerald-500" /> : <Circle size={16} className="text-muted-foreground" />}
+                             </div>
+                             <span className={`text-xs ${t.isCompleted ? 'line-through text-muted-foreground' : ''}`}>{t.title}</span>
+                          </div>
+                       </div>
+                     ))}
                   </div>
-                  <div className="p-3 bg-white rounded-xl border flex gap-3">
-                     <CheckCircle2 size={16} className="text-muted-foreground" />
-                     <span className="text-xs">Audit Zakat Maal Tahunan</span>
+                  
+                  <div className="flex gap-2 mt-4">
+                    <Input 
+                       placeholder="Tambah topik..." 
+                       className="text-xs h-9" 
+                       value={newTopic}
+                       onChange={(e) => setNewTopic(e.target.value)}
+                       onKeyDown={(e) => e.key === 'Enter' && handleAddTopic()}
+                    />
+                    <Button size="icon" className="h-9 w-9" onClick={handleAddTopic}>
+                       <Plus size={16} />
+                    </Button>
                   </div>
-                  <Button variant="ghost" className="w-full text-xs text-primary border border-primary/20 bg-white">
-                    Tambah Topik Inovasi
-                  </Button>
                </CardContent>
             </Card>
 
             <Card className="bg-amber-50 border-amber-200">
-               <CardHeader>
-                  <CardTitle className="text-sm flex items-center gap-2">
+               <CardHeader className="pb-1">
+                  <CardTitle className="text-sm flex items-center gap-2 text-amber-900">
                     <MessageSquare size={16} className="text-amber-600" />
                     Pesan Syura
                   </CardTitle>
@@ -126,6 +204,49 @@ export default function SyuraNotesPage() {
             </Card>
          </div>
       </div>
+
+      <Dialog open={showForm} onOpenChange={setShowForm}>
+         <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+               <DialogTitle className="text-2xl font-black uppercase tracking-tighter flex items-center gap-2">
+                  <Plus className="text-emerald-600" />
+                  Notulen Musyawarah Baru
+               </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+               <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Judul Musyawarah</label>
+                  <Input 
+                    placeholder="e.g. Rencana Pendidikan Hasan" 
+                    value={newNote.title}
+                    onChange={(e) => setNewNote({...newNote, title: e.target.value})}
+                  />
+               </div>
+               <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Hasil Keputusan</label>
+                  <Textarea 
+                    placeholder="Tuliskan poin-poin keputusan utama..." 
+                    className="min-h-[200px]"
+                    value={newNote.content}
+                    onChange={(e) => setNewNote({...newNote, content: e.target.value})}
+                  />
+               </div>
+               <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Peserta (pisahkan dengan koma)</label>
+                  <Input 
+                    placeholder="Ayah, Ibu, Aisyah..." 
+                    value={newNote.attendees}
+                    onChange={(e) => setNewNote({...newNote, attendees: e.target.value})}
+                  />
+               </div>
+            </div>
+            <DialogFooter>
+               <Button className="w-full bg-emerald-deep hover:bg-emerald-900 h-12 font-black uppercase tracking-widest" onClick={handleCreateNote} disabled={loading}>
+                  {loading ? "Menyimpan..." : "Simpan Notulen"}
+               </Button>
+            </DialogFooter>
+         </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -63,15 +63,33 @@ export function CategoryDonutChart() {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
+                <text
+                  x="50%"
+                  y="50%"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  className="fill-slate-800 font-black text-xs"
+                >
+                  TOTAL
+                </text>
+                <text
+                  x="50%"
+                  y="60%"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  className="fill-primary font-black text-[10px]"
+                >
+                  Rp {data.reduce((acc: number, curr: any) => acc + curr.value, 0).toLocaleString()}
+                </text>
                 <Tooltip 
                   formatter={(val: any) => formatCurrency(Number(val) || 0)}
-                  contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0' }}
+                  contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
                 <Legend 
                   verticalAlign="bottom" 
                   height={36} 
                   iconType="circle"
-                  formatter={(value) => <span className="text-xs text-muted-foreground">{value}</span>}
+                  formatter={(value) => <span className="text-[10px] uppercase font-black text-slate-400 tracking-widest">{value}</span>}
                 />
               </RePieChart>
             </ResponsiveContainer>

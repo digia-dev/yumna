@@ -86,4 +86,10 @@ export class BudgetingService {
       },
     });
   }
+
+  async deleteBudget(familyId: string, id: string) {
+    return this.prisma.budget.delete({
+      where: { id, familyId }
+    });
+  }
 }

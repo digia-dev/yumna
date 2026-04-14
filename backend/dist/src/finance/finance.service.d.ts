@@ -1,8 +1,10 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { TransactionType } from '@prisma/client';
+import { GamificationService } from '../gamification/gamification.service';
 export declare class FinanceService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private gamificationService;
+    constructor(prisma: PrismaService, gamificationService: GamificationService);
     getWallets(familyId: string): Promise<({
         user: {
             name: string;
@@ -276,6 +278,14 @@ export declare class FinanceService {
         type: import("@prisma/client").$Enums.TransactionType | null;
         icon: string | null;
     }>;
+    getWealthBreakdown(familyId: string): Promise<{
+        name: any;
+        val: number;
+        color: any;
+        amount: number;
+    }[]>;
+    private getWalletTypeName;
+    private getWalletTypeColor;
     createDebt(familyId: string, data: {
         personName: string;
         amount: number;
@@ -333,19 +343,76 @@ export declare class FinanceService {
         income: number;
         expense: number;
         balance: number;
-        topCategories: {
-            name: string;
-            amount: number;
-        }[];
-        budgetUsage: {
-            category: string;
-            limit: number;
-            spent: number;
-        }[];
+        topExpenseCategories: Record<string, number>;
         savingsProgress: {
             name: string;
             progress: number;
         }[];
     }>;
-    private calculateTopCategories;
+    private calculateCategoryBreakdown;
+    getSavingsGoals(familyId: string): Promise<{
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        familyId: string;
+        targetAmount: import("@prisma/client-runtime-utils").Decimal;
+        currentAmount: import("@prisma/client-runtime-utils").Decimal;
+        deadline: Date | null;
+    }[]>;
+    createSavingsGoal(familyId: string, data: {
+        name: string;
+        targetAmount: number;
+        deadline?: string;
+    }): Promise<{
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        familyId: string;
+        targetAmount: import("@prisma/client-runtime-utils").Decimal;
+        currentAmount: import("@prisma/client-runtime-utils").Decimal;
+        deadline: Date | null;
+    }>;
+    updateSavingsGoal(id: string, familyId: string, data: any): Promise<{
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        familyId: string;
+        targetAmount: import("@prisma/client-runtime-utils").Decimal;
+        currentAmount: import("@prisma/client-runtime-utils").Decimal;
+        deadline: Date | null;
+    }>;
+    deleteSavingsGoal(id: string, familyId: string): Promise<{
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        familyId: string;
+        targetAmount: import("@prisma/client-runtime-utils").Decimal;
+        currentAmount: import("@prisma/client-runtime-utils").Decimal;
+        deadline: Date | null;
+    }>;
+    addFundsToGoal(userId: string, familyId: string, goalId: string, walletId: string, amount: number): Promise<{
+        id: string;
+        createdAt: Date;
+        status: import("@prisma/client").$Enums.TransactionStatus;
+        familyId: string;
+        type: import("@prisma/client").$Enums.TransactionType;
+        isDeleted: boolean;
+        deletedAt: Date | null;
+        userId: string;
+        amount: import("@prisma/client-runtime-utils").Decimal;
+        category: string;
+        description: string | null;
+        tags: string[];
+        attachmentUrl: string | null;
+        location: import("@prisma/client/runtime/client").JsonValue | null;
+        date: Date;
+        metadata: import("@prisma/client/runtime/client").JsonValue | null;
+        walletId: string;
+        targetWalletId: string | null;
+        savingsGoalId: string | null;
+    }>;
 }

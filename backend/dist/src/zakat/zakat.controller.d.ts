@@ -76,6 +76,18 @@ export declare class ZakatController {
         totalAmount: number;
         description: string;
     }>;
+    distribute(userId: string, familyId: string, body: any): Promise<{
+        id: string;
+        createdAt: Date;
+        familyId: string;
+        type: string;
+        amount: import("@prisma/client-runtime-utils").Decimal;
+        date: Date;
+        nisabAtTime: import("@prisma/client-runtime-utils").Decimal;
+        goldPrice: import("@prisma/client-runtime-utils").Decimal;
+        recipient: string | null;
+        notes: string | null;
+    }>;
     logPayment(familyId: string, dto: LogZakatDto): Promise<{
         id: string;
         createdAt: Date;
