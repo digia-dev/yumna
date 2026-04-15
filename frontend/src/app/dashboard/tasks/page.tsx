@@ -5,7 +5,7 @@ import {
   Plus, 
   Search, 
   Filter, 
-  Calendar as CalendarIcon, 
+  Calendar, 
   CheckCircle2, 
   Circle, 
   Clock, 
@@ -150,7 +150,19 @@ export default function TasksPage() {
       await apiClient.post("/tasks", newTask);
       toast.success("Tugas berhasil dibuat!");
       setIsCreateOpen(false);
-      setNewTask({ title: "", description: "", priority: "MEDIUM", category: "Household", recurrence: "NONE", dueDate: "", assigneeId: "", isGoal: false });
+      setNewTask({ 
+        title: "", 
+        description: "", 
+        priority: "MEDIUM", 
+        category: "Household", 
+        recurrence: "NONE", 
+        dueDate: "", 
+        assigneeId: "", 
+        isGoal: false,
+        parentId: "",
+        billId: "",
+        dependencyIds: []
+      });
       fetchTasks(viewMode);
     } catch (err) {
       toast.error("Gagal membuat tugas.");
@@ -765,7 +777,7 @@ function TaskCard({ task, onClick, onToggle, compact = false, bills = [] }: any)
             
             {task.subTasks?.length > 0 && (
                <div className="mb-4 flex gap-2">
-                  <Badge variant="ghost" className="text-[8px] p-0 font-black text-emerald-600 uppercase">
+                  <Badge variant="outline" className="text-[8px] p-0 font-black text-emerald-600 uppercase border-none">
                      {task.subTasks.filter((st: any) => st.status === 'COMPLETED').length} / {task.subTasks.length} Sub-amanah
                   </Badge>
                </div>
