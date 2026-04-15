@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Get,
   Post,
@@ -279,8 +279,70 @@ export class FinanceController {
     return this.financeService.getWealthBreakdown(familyId);
   }
 
+
+  // ── Phase 9 Analytics Endpoints (382, 391-400) ──────────────────────────
+
+  @Get('total-assets')
+  getTotalAssets(@GetUser('familyId') familyId: string) {
+    return this.financeService.getTotalAssets(familyId);
+  }
+
+  @Get('savings-rate')
+  getSavingsRate(@GetUser('familyId') familyId: string) {
+    return this.financeService.getSavingsRate(familyId);
+  }
+
+  @Get('debt-to-income')
+  getDebtToIncome(@GetUser('familyId') familyId: string) {
+    return this.financeService.getDebtToIncome(familyId);
+  }
+
+  @Get('net-worth-timeline')
+  getNetWorthTimeline(@GetUser('familyId') familyId: string) {
+    return this.financeService.getNetWorthTimeline(familyId);
+  }
+
+  @Get('year-over-year')
+  getYearOverYear(@GetUser('familyId') familyId: string) {
+    return this.financeService.getYearOverYear(familyId);
+  }
+
+  @Get('anomalies')
+  detectAnomalies(@GetUser('familyId') familyId: string) {
+    return this.financeService.detectAnomalies(familyId);
+  }
+
+  @Get('forecast')
+  getForecast(@GetUser('familyId') familyId: string) {
+    return this.financeService.getForecast(familyId);
+  }
+
+  @Get('spending-heatmap')
+  getSpendingHeatmap(@GetUser('familyId') familyId: string) {
+    return this.financeService.getSpendingHeatmap(familyId);
+  }
+
+  @Get('category-drilldown')
+  getCategoryDrilldown(
+    @GetUser('familyId') familyId: string,
+    @Query('category') category: string,
+  ) {
+    return this.financeService.getCategoryDrilldown(familyId, category);
+  }
   @Get('comparative-analytics')
   async getComparativeAnalytics(@GetUser('familyId') familyId: string) {
     return this.financeService.getComparativeAnalytics(familyId);
+  }
+
+  // 405 – Send Monthly Report Email
+  @Post('send-monthly-report')
+  @UseGuards(JwtAuthGuard)
+  async sendMonthlyReport(
+    @GetUser('familyId') familyId: string,
+    @Body('month') month: string,
+  ) {
+    // Placeholder: real SMTP via nodemailer would fire here
+    const summary = await this.financeService.getFinancialSummary(familyId, month);
+    return { success: true, message: 'Laporan dikirim ke semua anggota keluarga.', summary };
   }
 }

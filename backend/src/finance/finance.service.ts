@@ -1122,4 +1122,236 @@ export class FinanceService {
       percent: Math.round(percent * 10) / 10,
     };
   }
+
+  // ── 382 Total Asset Sum ───────────────────────────────────────────────────
+  async getTotalAssets(familyId: string) {
+    const wallets = await this.prisma.wallet.findMany({
+      where: { familyId, isDeleted: false },
+      select: { id: true, name: true, type: true, balance: true },
+    });
+    const totalAssets = wallets.reduce((sum, w) => sum + Number(w.balance), 0);
+    const goals = await this.prisma.savingsGoal.findMany({ where: { familyId } });
+    const totalSavings = goals.reduce((sum, g) => sum + Number(g.currentAmount), 0);
+    const debts = await this.prisma.debt.findMany({ where: { familyId, isPaid: false } });
+    const totalLiabilities = debts.reduce((sum, d) => sum + Number(d.amount), 0);
+    return {
+      totalAssets,
+      totalSavings,
+      totalLiabilities,
+      netWorth: totalAssets - totalLiabilities,
+      walletBreakdown: wallets.map(w => ({ name: w.name, type: w.type, balance: Number(w.balance) })),
+    };
+  }
+
+  // ── 393 Savings Rate Tracker ──────────────────────────────────────────────
+  async getSavingsRate(familyId: string, months = 6) {
+    const results = [];
+    const now = new Date();
+    for (let i = months - 1; i >= 0; i--) {
+      const start = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const end   = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
+      const [inc, exp] = await Promise.all([
+        this.prisma.transaction.aggregate({ where: { familyId, type: 'INCOME', date: { gte: start, lte: end }, isDeleted: false }, _sum: { amount: true } }),
+        this.prisma.transaction.aggregate({ where: { familyId, type: 'EXPENSE', date: { gte: start, lte: end }, isDeleted: false }, _sum: { amount: true } }),
+      ]);
+      const income  = Number(inc._sum.amount || 0);
+      const expense = Number(exp._sum.amount || 0);
+      const saved   = income - expense;
+      results.push({
+        month: start.toISOString().slice(0, 7),
+        income,
+        expense,
+        saved,
+        savingsRate: income > 0 ? Math.round((saved / income) * 100) : 0,
+      });
+    }
+    return results;
+  }
+
+  // ── 399 Debt-to-Income Ratio ──────────────────────────────────────────────
+  async getDebtToIncome(familyId: string) {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const [incomeAgg, debts] = await Promise.all([
+      this.prisma.transaction.aggregate({ where: { familyId, type: 'INCOME', date: { gte: start }, isDeleted: false }, _sum: { amount: true } }),
+      this.prisma.debt.findMany({ where: { familyId, isPaid: false } }),
+    ]);
+    const monthlyIncome = Number(incomeAgg._sum.amount || 0);
+    const totalDebt = debts.reduce((s, d) => s + Number(d.amount), 0);
+    const dti = monthlyIncome > 0 ? (totalDebt / (monthlyIncome * 12)) * 100 : 0;
+    return {
+      monthlyIncome,
+      totalDebt,
+      debtToIncomeRatio: Math.round(dti * 10) / 10,
+      status: dti < 20 ? 'Aman' : dti < 40 ? 'Perlu Perhatian' : 'Berbahaya',
+      debts: debts.map(d => ({ name: d.personName, amount: Number(d.amount), type: d.type })),
+    };
+  }
+
+  // ── 400 Net Worth Tracker Over Time ──────────────────────────────────────
+  async getNetWorthTimeline(familyId: string, months = 6) {
+    const snapshots = await this.prisma.balanceSnapshot.findMany({
+      where: { familyId },
+      orderBy: { date: 'asc' },
+      take: months * 30,
+    });
+    const byMonth: Record<string, number> = {};
+    snapshots.forEach(s => {
+      const key = s.date.toISOString().slice(0, 7);
+      byMonth[key] = (byMonth[key] || 0) + Number(s.amount);
+    });
+    // If no snapshots, use current wallet balances as one data point
+    if (Object.keys(byMonth).length === 0) {
+      const wallets = await this.prisma.wallet.findMany({ where: { familyId, isDeleted: false } });
+      const total = wallets.reduce((s, w) => s + Number(w.balance), 0);
+      byMonth[new Date().toISOString().slice(0, 7)] = total;
+    }
+    return Object.entries(byMonth).map(([month, netWorth]) => ({ month, netWorth }));
+  }
+
+  // ── 392 Year-over-Year Analysis ──────────────────────────────────────────
+  async getYearOverYear(familyId: string) {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+    const result = [];
+    for (let m = 0; m < 12; m++) {
+      const currStart = new Date(currentYear, m, 1);
+      const currEnd   = new Date(currentYear, m + 1, 0, 23, 59, 59);
+      const prevStart = new Date(currentYear - 1, m, 1);
+      const prevEnd   = new Date(currentYear - 1, m + 1, 0, 23, 59, 59);
+      const [curr, prev] = await Promise.all([
+        this.prisma.transaction.aggregate({ where: { familyId, type: 'EXPENSE', date: { gte: currStart, lte: currEnd }, isDeleted: false }, _sum: { amount: true } }),
+        this.prisma.transaction.aggregate({ where: { familyId, type: 'EXPENSE', date: { gte: prevStart, lte: prevEnd }, isDeleted: false }, _sum: { amount: true } }),
+      ]);
+      result.push({
+        month: months[m],
+        thisYear: Number(curr._sum.amount || 0),
+        lastYear: Number(prev._sum.amount || 0),
+      });
+    }
+    return result;
+  }
+
+  // ── 397 Anomaly Detection ─────────────────────────────────────────────────
+  async detectAnomalies(familyId: string) {
+    const thirtyDays = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const txs = await this.prisma.transaction.findMany({
+      where: { familyId, type: 'EXPENSE', date: { gte: thirtyDays }, isDeleted: false },
+      include: { user: { select: { name: true } } },
+      orderBy: { amount: 'desc' },
+    });
+    if (txs.length < 3) return { anomalies: [], threshold: 0 };
+
+    const amounts = txs.map(t => Number(t.amount));
+    const avg = amounts.reduce((s, a) => s + a, 0) / amounts.length;
+    const std = Math.sqrt(amounts.reduce((s, a) => s + (a - avg) ** 2, 0) / amounts.length);
+    const threshold = avg + 2 * std; // 2-sigma rule
+
+    const anomalies = txs
+      .filter(t => Number(t.amount) > threshold)
+      .map(t => ({
+        id: t.id,
+        title: t.description || t.category,
+        amount: Number(t.amount),
+        category: t.category,
+        date: t.date,
+        user: t.user.name,
+        deviation: Math.round(((Number(t.amount) - avg) / std) * 10) / 10,
+      }));
+
+    return { anomalies, threshold: Math.round(threshold), avg: Math.round(avg) };
+  }
+
+  // ── 398 Financial Forecast ────────────────────────────────────────────────
+  async getForecast(familyId: string) {
+    // Simple linear regression on last 3 months
+    const months = await this.getSavingsRate(familyId, 3);
+    if (months.length < 2) return { next: null, trend: 'INSUFFICIENT_DATA' };
+
+    const avgExpense = months.reduce((s, m) => s + m.expense, 0) / months.length;
+    const avgIncome  = months.reduce((s, m) => s + m.income, 0) / months.length;
+
+    // Month-over-month slope for expenses
+    const slope = months.length > 1
+      ? (months[months.length - 1].expense - months[0].expense) / (months.length - 1)
+      : 0;
+
+    const nextExpense  = Math.max(0, avgExpense + slope);
+    const nextIncome   = avgIncome; // Assume stable income
+    const nextSavings  = nextIncome - nextExpense;
+    const savingsRate  = nextIncome > 0 ? (nextSavings / nextIncome) * 100 : 0;
+
+    return {
+      next: {
+        income:   Math.round(nextIncome),
+        expense:  Math.round(nextExpense),
+        savings:  Math.round(nextSavings),
+        savingsRate: Math.round(savingsRate * 10) / 10,
+      },
+      trend: slope > 5000 ? 'INCREASING' : slope < -5000 ? 'DECREASING' : 'STABLE',
+      advice: savingsRate < 10
+        ? 'Pengeluaran sangat tinggi. Pertimbangkan memangkas kategori tidak esensial.'
+        : savingsRate < 20
+        ? 'Tingkat tabungan rendah. Cobalah menabung minimal 20% dari pemasukan.'
+        : 'Alhamdulillah, keuangan keluarga dalam kondisi sehat!',
+    };
+  }
+
+  // ── 396 Spending Heatmap (day-of-week x hour) ────────────────────────────
+  async getSpendingHeatmap(familyId: string) {
+    const thirtyDays = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+    const txs = await this.prisma.transaction.findMany({
+      where: { familyId, type: 'EXPENSE', date: { gte: thirtyDays }, isDeleted: false },
+      select: { amount: true, date: true },
+    });
+
+    // Build [day][week] matrix
+    const matrix: number[][] = Array.from({ length: 7 }, () => Array(4).fill(0));
+    const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+
+    txs.forEach(t => {
+      const day = t.date.getDay();
+      const week = Math.floor(t.date.getDate() / 7);
+      matrix[day][Math.min(week, 3)] += Number(t.amount);
+    });
+
+    return {
+      days,
+      matrix,
+      maxValue: Math.max(...matrix.flat()),
+    };
+  }
+
+  // ── 391 Drill-down Analytics ─────────────────────────────────────────────
+  async getCategoryDrilldown(familyId: string, category: string, months = 3) {
+    const start = new Date(Date.now() - months * 30 * 24 * 60 * 60 * 1000);
+    const txs = await this.prisma.transaction.findMany({
+      where: { familyId, category, type: 'EXPENSE', date: { gte: start }, isDeleted: false },
+      include: { user: { select: { name: true } } },
+      orderBy: { date: 'desc' },
+    });
+
+    const byUser: Record<string, number> = {};
+    const byMonth: Record<string, number> = {};
+    txs.forEach(t => {
+      byUser[t.user.name] = (byUser[t.user.name] || 0) + Number(t.amount);
+      const m = t.date.toISOString().slice(0, 7);
+      byMonth[m] = (byMonth[m] || 0) + Number(t.amount);
+    });
+
+    return {
+      category,
+      total: txs.reduce((s, t) => s + Number(t.amount), 0),
+      count: txs.length,
+      byUser: Object.entries(byUser).map(([name, amount]) => ({ name, amount })),
+      byMonth: Object.entries(byMonth).map(([month, amount]) => ({ month, amount })),
+      transactions: txs.slice(0, 10).map(t => ({
+        date: t.date,
+        amount: Number(t.amount),
+        description: t.description,
+        user: t.user.name,
+      })),
+    };
+  }
 }

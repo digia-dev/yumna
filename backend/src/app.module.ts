@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggerModule } from 'nestjs-pino';
@@ -24,6 +24,10 @@ import { ChatModule } from './chat/chat.module';
 import { ScheduleModule } from './schedule/schedule.module';
 import { GamificationModule } from './gamification/gamification.module';
 import { BillsModule } from './bills/bills.module';
+import { EventsModule } from './events/events.module';
+import { NotesModule } from './notes/notes.module';
+import { WafMiddleware } from './common/middleware/waf.middleware';
+import { DiskMonitorService } from './common/monitoring/disk-monitor.service';
 
 @Module({
   imports: [
@@ -60,14 +64,22 @@ import { BillsModule } from './bills/bills.module';
     ChatModule,
     ScheduleModule,
     GamificationModule,
+    EventsModule,
+    NotesModule,
   ],
   controllers: [AppController, HealthController],
   providers: [
     AppService,
+    DiskMonitorService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // 424/425 – Apply WAF + rate-limit + payload scanner to all routes
+    consumer.apply(WafMiddleware).forRoutes('*');
+  }
+}

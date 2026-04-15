@@ -6,8 +6,12 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   UseGuards,
+  Res,
+  HttpCode,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { TasksService } from './tasks.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
@@ -27,9 +31,25 @@ export class TasksController {
     return this.tasksService.create(userId, familyId, dto);
   }
 
+  // ── 358 Filter by Assignee + 370 Paginated ──────────────────────────────
   @Get()
-  async findAll(@GetUser('familyId') familyId: string) {
-    return this.tasksService.findAll(familyId);
+  async findAll(
+    @GetUser('id') userId: string,
+    @GetUser('familyId') familyId: string,
+    @Query('assigneeId') assigneeId?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    if (page) {
+      return this.tasksService.findAllPaginated(
+        familyId,
+        userId,
+        parseInt(page) || 1,
+        parseInt(limit ?? '20') || 20,
+        assigneeId,
+      );
+    }
+    return this.tasksService.findAll(familyId, userId);
   }
 
   @Get('history')
@@ -47,14 +67,35 @@ export class TasksController {
     return this.tasksService.getSuggestions(familyId);
   }
 
-  @Patch(':id')
-  async update(
-    @Param('id') id: string,
-    @GetUser('id') userId: string,
-    @GetUser('familyId') familyId: string,
-    @Body() dto: UpdateTaskDto,
-  ) {
-    return this.tasksService.update(id, userId, familyId, dto);
+  // ── 356 Task Leaderboard ─────────────────────────────────────────────────
+  @Get('leaderboard')
+  async getLeaderboard(@GetUser('familyId') familyId: string) {
+    return this.tasksService.getLeaderboard(familyId);
+  }
+
+  // ── 361 Weekly Routine ──────────────────────────────────────────────────
+  @Get('weekly-routine')
+  async getWeeklyRoutine(@GetUser('familyId') familyId: string) {
+    return this.tasksService.getWeeklyRoutine(familyId);
+  }
+
+  // ── 362 Holiday Planner ─────────────────────────────────────────────────
+  @Get('holiday-planner')
+  async getHolidayPlanner(@GetUser('familyId') familyId: string) {
+    return this.tasksService.getHolidayPlanner(familyId);
+  }
+
+  // ── 364 Auto-archive ────────────────────────────────────────────────────
+  @Post('auto-archive')
+  @HttpCode(200)
+  async autoArchive(@GetUser('familyId') familyId: string) {
+    return this.tasksService.autoArchive(familyId);
+  }
+
+  // ── 368 Family Agenda (JSON for PDF client-side render) ─────────────────
+  @Get('agenda')
+  async getFamilyAgenda(@GetUser('familyId') familyId: string) {
+    return this.tasksService.getFamilyAgenda(familyId);
   }
 
   @Post('templates/apply')
@@ -95,6 +136,17 @@ export class TasksController {
     return this.tasksService.findOne(id, familyId);
   }
 
+  // ── 357 Sub-tasks: create child task under parent ───────────────────────
+  @Post(':id/subtasks')
+  async createSubTask(
+    @Param('id') parentId: string,
+    @GetUser('id') userId: string,
+    @GetUser('familyId') familyId: string,
+    @Body() dto: CreateTaskDto,
+  ) {
+    return this.tasksService.create(userId, familyId, { ...dto, parentId });
+  }
+
   @Post(':id/comments')
   async addComment(
     @Param('id') id: string,
@@ -123,6 +175,16 @@ export class TasksController {
   @Delete('checklists/:itemId')
   async removeChecklistItem(@Param('itemId') itemId: string) {
     return this.tasksService.removeChecklistItem(itemId);
+  }
+
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @GetUser('id') userId: string,
+    @GetUser('familyId') familyId: string,
+    @Body() dto: UpdateTaskDto,
+  ) {
+    return this.tasksService.update(id, userId, familyId, dto);
   }
 
   @Delete(':id')

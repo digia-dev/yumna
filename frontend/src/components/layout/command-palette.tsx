@@ -19,6 +19,10 @@ import {
   History as HistoryIcon,
   MessageSquare as MessageIcon,
   Sparkles,
+  Heart,
+  BookOpen,
+  FileText,
+  Shield,
 } from "lucide-react"
 
 import { useSakinah } from "@/components/providers/sakinah-provider"
@@ -109,6 +113,26 @@ export function CommandPalette() {
           <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/tasks"))}>
             <Calendar className="mr-2 h-4 w-4" />
             <span>Agenda & Tugas</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/events"))}>
+            <Heart className="mr-2 h-4 w-4 text-rose-500" />
+            <span>Momen Keluarga (Hari Jadi & Rapat)</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/notes"))}>
+            <FileText className="mr-2 h-4 w-4 text-amber-500" />
+            <span>Wiki & Catatan Keluarga</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/reports/generator"))}>
+            <BookOpen className="mr-2 h-4 w-4 text-blue-500" />
+            <span>Generator Laporan (PDF / CSV / Pajak)</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/help"))}>
+            <Search className="mr-2 h-4 w-4 text-purple-500" />
+            <span>Pusat Bantuan & FAQ</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/privacy"))}>
+            <Shield className="mr-2 h-4 w-4 text-slate-400" />
+            <span>Kebijakan Privasi</span>
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/profile"))}>
             <Settings className="mr-2 h-4 w-4" />

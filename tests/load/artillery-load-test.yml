@@ -1,0 +1,139 @@
+# 430 – Artillery Load Test Configuration
+# Run: npx artillery run tests/load/artillery-load-test.yml
+# Install: npm install -g artillery
+
+config:
+  target: "http://localhost:3001"
+  phases:
+    # Phase 1: Warm-up
+    - duration: 30
+      arrivalRate: 5
+      name: "Warm-up (5 req/s)"
+    # Phase 2: Ramp-up to 100 req/s
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 100
+      name: "Ramp-up (5→100 req/s)"
+    # Phase 3: Sustained load (1000 concurrent at ~100 req/s)
+    - duration: 120
+      arrivalRate: 100
+      name: "Sustained peak (100 req/s)"
+    # Phase 4: Ramp-down
+    - duration: 30
+      arrivalRate: 100
+      rampTo: 0
+      name: "Cool-down"
+
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+  # Thresholds: fail if p95 > 2s or error rate > 1%
+  ensure:
+    p95: 2000
+    maxErrorRate: 1
+
+  plugins:
+    metrics-by-endpoint:
+      useOnlyRequestNames: true
+
+scenarios:
+  # ── Scenario 1: Health check (lightweight probe) ─────────────────────
+  - name: "Health Check"
+    weight: 10
+    flow:
+      - get:
+          url: "/health"
+          expect:
+            - statusCode: 200
+
+  # ── Scenario 2: Auth → Dashboard reads ──────────────────────────────
+  - name: "Auth + Dashboard Read"
+    weight: 50
+    flow:
+      - post:
+          url: "/auth/login"
+          json:
+            email: "{{ $env.TEST_EMAIL }}"
+            password: "{{ $env.TEST_PASS }}"
+          capture:
+            - json: "$.data.access_token"
+              as: "token"
+          expect:
+            - statusCode: 200
+            - hasProperty: "data.access_token"
+      - get:
+          url: "/finance/wallets"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/finance/summary"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/tasks"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200
+
+  # ── Scenario 3: Transaction write ────────────────────────────────────
+  - name: "Transaction Write"
+    weight: 30
+    flow:
+      - post:
+          url: "/auth/login"
+          json:
+            email: "{{ $env.TEST_EMAIL }}"
+            password: "{{ $env.TEST_PASS }}"
+          capture:
+            - json: "$.data.access_token"
+              as: "token"
+      - get:
+          url: "/finance/wallets"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          capture:
+            - json: "$.data[0].id"
+              as: "walletId"
+      - post:
+          url: "/finance/transactions"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            amount: 50000
+            type: "EXPENSE"
+            category: "Makanan"
+            description: "Artillery load test"
+            walletId: "{{ walletId }}"
+          expect:
+            - statusCode: [200, 201]
+
+  # ── Scenario 4: Analytics (read-heavy) ───────────────────────────────
+  - name: "Analytics Reads"
+    weight: 10
+    flow:
+      - post:
+          url: "/auth/login"
+          json:
+            email: "{{ $env.TEST_EMAIL }}"
+            password: "{{ $env.TEST_PASS }}"
+          capture:
+            - json: "$.data.access_token"
+              as: "token"
+      - get:
+          url: "/finance/total-assets"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      - get:
+          url: "/finance/spending-heatmap"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      - get:
+          url: "/finance/comparative-analytics"
+          headers:
+            Authorization: "Bearer {{ token }}"
