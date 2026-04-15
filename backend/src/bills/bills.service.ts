@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBillDto, UpdateBillDto } from './dto/bill.dto';
 
@@ -74,9 +78,11 @@ export class BillsService {
 
   async payBill(id: string, familyId: string, userId: string, amount: number) {
     const bill = await this.findOne(id, familyId);
-    
+
     if (!bill.walletId) {
-      throw new BadRequestException('Tagihan ini tidak memiliki dompet sumber pembayaran.');
+      throw new BadRequestException(
+        'Tagihan ini tidak memiliki dompet sumber pembayaran.',
+      );
     }
 
     // Create transaction
@@ -91,13 +97,13 @@ export class BillsService {
         userId,
         walletId: bill.walletId,
         billId: bill.id,
-      }
+      },
     });
 
     // Update bill status if fully paid (simple logic for now)
     await this.prisma.bill.update({
       where: { id },
-      data: { isPaid: true }
+      data: { isPaid: true },
     });
 
     return transaction;

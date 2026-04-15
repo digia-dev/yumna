@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Patch, Body, Query, UseGuards, Req, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Body,
+  Query,
+  UseGuards,
+  Req,
+  Param,
+} from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -25,7 +35,12 @@ export class ChatController {
   ) {
     const userId = req.user.id;
     const familyId = req.user.familyId;
-    return this.chatService.sendMessage(userId, familyId, message, attachmentUrl);
+    return this.chatService.sendMessage(
+      userId,
+      familyId,
+      message,
+      attachmentUrl,
+    );
   }
 
   @Get('pinned')
@@ -56,10 +71,7 @@ export class ChatController {
   }
 
   @Post('delete')
-  async deleteMessage(
-    @Req() req: any,
-    @Body('messageId') messageId: string,
-  ) {
+  async deleteMessage(@Req() req: any, @Body('messageId') messageId: string) {
     const userId = req.user.id;
     const familyId = req.user.familyId;
     return this.chatService.deleteMessage(messageId, userId, familyId);

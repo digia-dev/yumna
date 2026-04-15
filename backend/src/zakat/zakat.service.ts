@@ -7,9 +7,9 @@ import { firstValueFrom } from 'rxjs';
 @Injectable()
 export class ZakatService {
   private readonly logger = new Logger(ZakatService.name);
-  
+
   // Default fallback if API fails
-  private DEFAULT_GOLD_PRICE = 1200000; 
+  private DEFAULT_GOLD_PRICE = 1200000;
   private CACHE_KEY = 'gold_price_idr';
 
   constructor(
@@ -30,14 +30,14 @@ export class ZakatService {
       // 2. Fetch from API (Example API)
       // Note: This URL might need updating based on the actual available public API
       const response = await firstValueFrom(
-        this.http.get('https://logammulia-api.vercel.app/prices/latest')
+        this.http.get('https://logammulia-api.vercel.app/prices/latest'),
       );
-      
+
       const price = response.data?.data?.[0]?.sell || this.DEFAULT_GOLD_PRICE;
-      
+
       // 3. Cache for 1 hour
       await this.redis.set(this.CACHE_KEY, price.toString(), 3600);
-      
+
       return price;
     } catch (error) {
       this.logger.error('Failed to fetch gold price, using fallback', error);
@@ -101,7 +101,10 @@ export class ZakatService {
   /**
    * Calculate Zakat Fitrah (Based on family members)
    */
-  async calculateZakatFitrah(totalMembers: number, ricePricePerKg = 15000): Promise<{
+  async calculateZakatFitrah(
+    totalMembers: number,
+    ricePricePerKg = 15000,
+  ): Promise<{
     totalRice: number;
     totalAmount: number;
   }> {
@@ -117,7 +120,13 @@ export class ZakatService {
   /**
    * Log Zakat payment to database with distribution details
    */
-  async logZakatPayment(familyId: string, amount: number, type: string, recipient?: string, notes?: string) {
+  async logZakatPayment(
+    familyId: string,
+    amount: number,
+    type: string,
+    recipient?: string,
+    notes?: string,
+  ) {
     const goldPrice = await this.getGoldPrice();
     const nisab = await this.getNisabMaal();
 
@@ -138,7 +147,17 @@ export class ZakatService {
   /**
    * Handle Zakat distribution (Transaction + Log)
    */
-  async distributeZakat(userId: string, familyId: string, data: { walletId: string, amount: number, type: string, recipient: string, notes?: string }) {
+  async distributeZakat(
+    userId: string,
+    familyId: string,
+    data: {
+      walletId: string;
+      amount: number;
+      type: string;
+      recipient: string;
+      notes?: string;
+    },
+  ) {
     // 1. Create Expense Transaction
     await this.prisma.transaction.create({
       data: {
@@ -150,17 +169,23 @@ export class ZakatService {
         category: 'Zakat & Infaq',
         description: `Penyaluran ${data.type} ke ${data.recipient}`,
         date: new Date(),
-      }
+      },
     });
 
     // 2. Update Wallet Balance
     await this.prisma.wallet.update({
       where: { id: data.walletId },
-      data: { balance: { decrement: data.amount } }
+      data: { balance: { decrement: data.amount } },
     });
 
     // 3. Log to Zakat History
-    return this.logZakatPayment(familyId, data.amount, data.type, data.recipient, data.notes);
+    return this.logZakatPayment(
+      familyId,
+      data.amount,
+      data.type,
+      data.recipient,
+      data.notes,
+    );
   }
 
   /**
@@ -176,7 +201,10 @@ export class ZakatService {
   /**
    * Calculate Fidyah and Kaffarah
    */
-  async calculateFidyah(days: number, mealPrice = 45000): Promise<{
+  async calculateFidyah(
+    days: number,
+    mealPrice = 45000,
+  ): Promise<{
     totalAmount: number;
     description: string;
   }> {
@@ -197,7 +225,7 @@ export class ZakatService {
     nisabAtStart?: number;
   }> {
     const nisab = await this.getNisabMaal();
-    
+
     // Find earliest snapshot where balance >= current Nisab
     // In a real scenario, we'd check if it STAYED above Nisab continuously
     const snapshots = await this.prisma.balanceSnapshot.findMany({
@@ -211,7 +239,7 @@ export class ZakatService {
     const now = new Date();
     const durationMs = now.getTime() - startDate.getTime();
     const durationDays = Math.floor(durationMs / (1000 * 60 * 60 * 24));
-    
+
     return {
       isHaulMet: durationDays >= 354, // Lunar year is approx 354 days
       durationDays,
@@ -227,7 +255,7 @@ export class ZakatService {
     if (currentBalance >= nisab) {
       // Notify Kepala Keluarga
       const head = await this.prisma.user.findFirst({
-        where: { familyId, role: 'KEPALA_KELUARGA' }
+        where: { familyId, role: 'KEPALA_KELUARGA' },
       });
 
       if (head) {
@@ -251,10 +279,22 @@ export class ZakatService {
    */
   getDailyQuotes() {
     const quotes = [
-      { text: "Berikanlah zakat dari hartamu, karena ia adalah pembersih bagimu.", author: "Imam Syafi'i" },
-      { text: "Tangan di atas lebih baik daripada tangan di bawah.", author: "Hadits Nabi SAW" },
-      { text: "Barangsiapa yang memberi pinjaman kepada Allah dengan pinjaman yang baik, maka Allah akan melipatgandakan baginya.", author: "QS. Al-Baqarah: 245" },
-      { text: "Kekayaan sejati bukanlah banyaknya harta, melainkan kepuasan hati (qana'ah).", author: "Hadits Nabi SAW" },
+      {
+        text: 'Berikanlah zakat dari hartamu, karena ia adalah pembersih bagimu.',
+        author: "Imam Syafi'i",
+      },
+      {
+        text: 'Tangan di atas lebih baik daripada tangan di bawah.',
+        author: 'Hadits Nabi SAW',
+      },
+      {
+        text: 'Barangsiapa yang memberi pinjaman kepada Allah dengan pinjaman yang baik, maka Allah akan melipatgandakan baginya.',
+        author: 'QS. Al-Baqarah: 245',
+      },
+      {
+        text: "Kekayaan sejati bukanlah banyaknya harta, melainkan kepuasan hati (qana'ah).",
+        author: 'Hadits Nabi SAW',
+      },
     ];
     return quotes[Math.floor(Math.random() * quotes.length)];
   }
@@ -293,15 +333,15 @@ export class ZakatService {
   async getZakatReminders(familyId: string) {
     const now = new Date();
     const isBeginningOfMonth = now.getDate() <= 7;
-    
+
     // Check if profession zakat logged this month
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const existingLog = await this.prisma.zakatLog.findFirst({
       where: {
         familyId,
         type: 'PROFESSION',
-        date: { gte: startOfMonth }
-      }
+        date: { gte: startOfMonth },
+      },
     });
 
     const reminders = [];
@@ -310,7 +350,7 @@ export class ZakatService {
         type: 'MONTHLY_PROFESSION',
         title: 'Zakat Profesi Bulanan',
         message: 'Sudahkah Anda menyisihkan zakat profesi bulan ini?',
-        action: '/dashboard/zakat'
+        action: '/dashboard/zakat',
       });
     }
 

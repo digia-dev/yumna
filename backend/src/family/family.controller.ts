@@ -1,4 +1,14 @@
-import { Controller, Get, Patch, Body, UseGuards, Delete, Param, Query, Post } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Body,
+  UseGuards,
+  Delete,
+  Param,
+  Query,
+  Post,
+} from '@nestjs/common';
 import { FamilyService } from './family.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';

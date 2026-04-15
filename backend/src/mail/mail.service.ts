@@ -19,6 +19,8 @@ export class MailService {
 
   async sendPasswordReset(email: string, token: string) {
     // Scaffold for password reset email if needed later
-    console.log(`[MAIL] Sending password reset to ${email} with token ${token}`);
+    console.log(
+      `[MAIL] Sending password reset to ${email} with token ${token}`,
+    );
   }
 }

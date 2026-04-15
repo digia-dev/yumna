@@ -39,7 +39,10 @@ export class ZakatController {
 
   @Post('inheritance')
   async calculateWaris(@Body() data: any) {
-    return this.inheritanceService.calculateInheritance(data.totalWealth, data.heirs);
+    return this.inheritanceService.calculateInheritance(
+      data.totalWealth,
+      data.heirs,
+    );
   }
 
   @Post('calculate')
@@ -88,11 +91,11 @@ export class ZakatController {
     @Body() dto: LogZakatDto,
   ) {
     return this.zakatService.logZakatPayment(
-      familyId, 
-      dto.amount, 
-      dto.type, 
-      (dto as any).recipient, 
-      (dto as any).notes
+      familyId,
+      dto.amount,
+      dto.type,
+      (dto as any).recipient,
+      (dto as any).notes,
     );
   }
 }

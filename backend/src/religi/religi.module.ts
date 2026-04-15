@@ -5,6 +5,6 @@ import { ReligiController } from './religi.controller';
 @Module({
   providers: [ReligiService],
   controllers: [ReligiController],
-  exports: [ReligiService]
+  exports: [ReligiService],
 })
 export class ReligiModule {}

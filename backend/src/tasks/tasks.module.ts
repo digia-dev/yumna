@@ -8,6 +8,6 @@ import { AiModule } from '../ai/ai.module';
   imports: [GamificationModule, AiModule],
   providers: [TasksService],
   controllers: [TasksController],
-  exports: [TasksService]
+  exports: [TasksService],
 })
 export class TasksModule {}

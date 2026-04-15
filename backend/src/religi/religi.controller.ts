@@ -14,22 +14,34 @@ export class ReligiController {
   }
 
   @Post('khatam')
-  async updateKhatam(@GetUser('id') userId: string, @Body() body: { juz: number }) {
+  async updateKhatam(
+    @GetUser('id') userId: string,
+    @Body() body: { juz: number },
+  ) {
     return this.religiService.updateKhatam(userId, body.juz);
   }
 
   @Post('habit')
-  async logHabit(@GetUser('id') userId: string, @Body() body: { name: string }) {
+  async logHabit(
+    @GetUser('id') userId: string,
+    @Body() body: { name: string },
+  ) {
     return this.religiService.logHabit(userId, body.name);
   }
 
   @Post('fasting')
-  async logFasting(@GetUser('id') userId: string, @Body() body: { type: string }) {
+  async logFasting(
+    @GetUser('id') userId: string,
+    @Body() body: { type: string },
+  ) {
     return this.religiService.logFasting(userId, body.type);
   }
 
   @Post('prayer-log')
-  async logPrayer(@GetUser('id') userId: string, @Body() body: { prayerName: string, isOnTime: boolean }) {
+  async logPrayer(
+    @GetUser('id') userId: string,
+    @Body() body: { prayerName: string; isOnTime: boolean },
+  ) {
     return this.religiService.logPrayer(userId, body.prayerName, body.isOnTime);
   }
 

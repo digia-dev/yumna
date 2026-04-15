@@ -25,7 +25,9 @@ describe('Finance & Wallets (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, transform: true }),
+    );
     app.useGlobalFilters(new AllExceptionsFilter());
     app.useGlobalInterceptors(new ResponseInterceptor());
     await app.init();
@@ -34,7 +36,7 @@ describe('Finance & Wallets (e2e)', () => {
 
     // 1. Cleanup
     await prisma.user.deleteMany({ where: { email: testUser.email } });
-    
+
     // 2. Create Family
     const family = await prisma.family.create({
       data: { name: 'Test Finance Family' },
@@ -45,11 +47,11 @@ describe('Finance & Wallets (e2e)', () => {
     await request(app.getHttpServer())
       .post('/auth/register')
       .send({ ...testUser, familyId });
-    
+
     const loginRes = await request(app.getHttpServer())
       .post('/auth/login')
       .send({ email: testUser.email, password: testUser.password });
-    
+
     jwtToken = loginRes.body.data.access_token;
   });
 

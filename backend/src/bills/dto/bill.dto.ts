@@ -1,4 +1,12 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsDateString, IsEnum, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsNumber,
+  IsDateString,
+  IsEnum,
+  IsBoolean,
+} from 'class-validator';
 import { RecurrenceType } from '@prisma/client';
 
 export class CreateBillDto {

@@ -16,7 +16,7 @@ export class AiController {
   @Post('chat')
   async chat(
     @Body('message') message: string,
-    @Body('history') history: any[] = []
+    @Body('history') history: any[] = [],
   ) {
     const response = await this.aiService.chat(message, history);
     return { response };

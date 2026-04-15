@@ -8,41 +8,44 @@ export class SyuraService {
   async getNotes(familyId: string) {
     return this.prisma.syuraNote.findMany({
       where: { familyId },
-      orderBy: { date: 'desc' }
+      orderBy: { date: 'desc' },
     });
   }
 
-  async createNote(familyId: string, data: { title: string; content: string; attendees: string[] }) {
+  async createNote(
+    familyId: string,
+    data: { title: string; content: string; attendees: string[] },
+  ) {
     return this.prisma.syuraNote.create({
       data: {
         ...data,
-        familyId
-      }
+        familyId,
+      },
     });
   }
 
   async getTopics(familyId: string) {
     return this.prisma.syuraTopic.findMany({
       where: { familyId },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
   }
 
   async createTopic(familyId: string, title: string) {
     return this.prisma.syuraTopic.create({
-      data: { title, familyId }
+      data: { title, familyId },
     });
   }
 
   async toggleTopic(id: string, familyId: string) {
     const topic = await this.prisma.syuraTopic.findFirst({
-      where: { id, familyId }
+      where: { id, familyId },
     });
     if (!topic) return null;
 
     return this.prisma.syuraTopic.update({
       where: { id },
-      data: { isCompleted: !topic.isCompleted }
+      data: { isCompleted: !topic.isCompleted },
     });
   }
 }

@@ -1,32 +1,92 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ComponentProps } from "react";
+import Image from "next/image";
 import { 
   Plus, 
   Search, 
-  Filter, 
   Calendar, 
   CheckCircle2, 
   Circle, 
-  Clock, 
-  MoreVertical,
   User as UserIcon,
-  AlertCircle,
-  LayoutGrid,
-  List as ListIcon,
   Trash2,
   Edit2,
   Image as ImageIcon,
   CheckCircle,
   Download,
-  Layout,
   ClipboardList,
-  Kanban,
-  ShoppingCart,
-  Camera,
-  ChevronRight,
-  X
 } from "lucide-react";
+
+interface UserSummary {
+  id: string;
+  name: string;
+  image?: string | null;
+}
+
+interface TaskChecklistItem {
+  id: string;
+  title: string;
+  isDone: boolean;
+}
+
+interface TaskComment {
+  id: string;
+  content: string;
+  createdAt: string;
+  user: UserSummary;
+}
+
+interface TaskAttachment {
+  id: string;
+  url: string;
+  name: string;
+}
+
+interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  priority: string;
+  category?: string;
+  status: string;
+  assignee?: UserSummary | null;
+  billId?: string;
+  bill?: {
+    id: string;
+    title: string;
+    description?: string;
+    amount: number;
+    status?: string;
+  } | null;
+  subTasks?: Task[];
+  isGoal?: boolean;
+  goalProgress?: number;
+  checklists?: TaskChecklistItem[];
+  attachments?: TaskAttachment[];
+  comments?: TaskComment[];
+  lastEditedAt?: string;
+  updatedAt?: string;
+}
+
+interface AuditLogEntry {
+  id: string;
+  action: string;
+  details?: string;
+  createdAt: string;
+  user?: UserSummary | null;
+}
+
+interface Suggestion {
+  title: string;
+  description: string;
+  priority: string;
+  category: string;
+}
+
+interface BillSummary {
+  id: string;
+  amount: number;
+}
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -57,7 +117,6 @@ import {
 import { toast } from "sonner";
 import apiClient from "@/lib/api-client";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/hooks/use-auth";
 import confetti from "canvas-confetti";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -65,16 +124,14 @@ const CATEGORIES = ["Household", "Finance", "Belanja", "Worship", "Health", "Lai
 const PRIORITIES = ["LOW", "MEDIUM", "HIGH", "URGENT"];
 
 export default function TasksPage() {
-  const { user } = useAuth();
-  const [tasks, setTasks] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<(Task | AuditLogEntry)[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [view, setView] = useState<"list" | "grid" | "board">("grid");
   const [viewMode, setViewMode] = useState<"active" | "board" | "shopping" | "bills" | "history">("active");
   const [isSuggesting, setIsSuggesting] = useState(false);
-  const [suggestions, setSuggestions] = useState<any[]>([]);
-  const [bills, setBills] = useState<any[]>([]);
-  const [wallets, setWallets] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [bills, setBills] = useState<BillSummary[]>([]);
+  const [wallets, setWallets] = useState<BillSummary[]>([]);
   
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newTask, setNewTask] = useState({
@@ -91,8 +148,8 @@ export default function TasksPage() {
     dependencyIds: [] as string[]
   });
 
-  const [familyMembers, setFamilyMembers] = useState<any[]>([]);
-  const [selectedTask, setSelectedTask] = useState<any>(null);
+  const [familyMembers, setFamilyMembers] = useState<UserSummary[]>([]);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [checklistInput, setChecklistInput] = useState("");
   const [commentInput, setCommentInput] = useState("");
@@ -109,7 +166,7 @@ export default function TasksPage() {
       
       const res = await apiClient.get(endpoint);
       setTasks(res.data);
-    } catch (err) {
+    } catch {
       toast.error("Gagal memuat tugas.");
     } finally {
       setLoading(false);
@@ -120,21 +177,21 @@ export default function TasksPage() {
     try {
       const res = await apiClient.get("/bills");
       setBills(res.data);
-    } catch (err) {}
+    } catch {}
   };
 
   const fetchWallets = async () => {
     try {
       const res = await apiClient.get("/finance/wallets");
       setWallets(res.data);
-    } catch (err) {}
+    } catch {}
   };
 
   const fetchMembers = async () => {
     try {
       const res = await apiClient.get("/family/members");
       setFamilyMembers(res.data);
-    } catch (err) {}
+    } catch {}
   };
 
   useEffect(() => {
@@ -164,7 +221,7 @@ export default function TasksPage() {
         dependencyIds: []
       });
       fetchTasks(viewMode);
-    } catch (err) {
+    } catch {
       toast.error("Gagal membuat tugas.");
     }
   };
@@ -183,7 +240,7 @@ export default function TasksPage() {
         });
         toast.success("Barakallah! Tugas selesai.");
       }
-    } catch (err) {
+    } catch {
       toast.error("Gagal memperbarui status.");
     }
   };
@@ -194,7 +251,7 @@ export default function TasksPage() {
        setTasks(tasks.map(t => t.id === taskId ? { ...t, goalProgress: progress } : t));
        if (selectedTask?.id === taskId) setSelectedTask({ ...selectedTask, goalProgress: progress });
        if (progress === 100) confetti();
-    } catch (err) {
+    } catch {
        toast.error("Gagal memperbarui progress.");
     }
   };
@@ -204,7 +261,7 @@ export default function TasksPage() {
       const res = await apiClient.get(`/tasks/${taskId}`);
       setSelectedTask(res.data);
       setIsDetailOpen(true);
-    } catch (err) {
+    } catch {
       toast.error("Gagal memuat detail tugas.");
     }
   };
@@ -219,7 +276,7 @@ export default function TasksPage() {
         comments: [res.data, ...(selectedTask.comments || [])]
       });
       setCommentInput("");
-    } catch (err) {
+    } catch {
       toast.error("Gagal menambah komentar.");
     } finally {
       setIsSubmitting(false);
@@ -237,7 +294,7 @@ export default function TasksPage() {
       setAttachmentUrl("");
       setAttachmentName("");
       toast.success("Foto bukti ditambahkan!");
-    } catch (err) {
+    } catch {
       toast.error("Gagal menambah lampiran.");
     }
   };
@@ -245,11 +302,12 @@ export default function TasksPage() {
   const deleteAttachment = async (id: string) => {
     try {
       await apiClient.delete(`/tasks/attachments/${id}`);
-      setSelectedTask({
-        ...selectedTask,
-        attachments: selectedTask.attachments.filter((a: any) => a.id !== id)
-      });
-    } catch (err) {}
+      setSelectedTask((current) => current ? {
+        ...current,
+        attachments: current.attachments?.filter((a) => a.id !== id) || []
+      } : null);
+    } catch {
+    }
   };
 
   const applyTemplate = async (templateType: string) => {
@@ -257,7 +315,7 @@ export default function TasksPage() {
       await apiClient.post("/tasks/templates/apply", { templateType });
       toast.success("Template berhasil diterapkan!");
       fetchTasks(viewMode);
-    } catch (err) {
+    } catch {
       toast.error("Gagal menerapkan template.");
     }
   };
@@ -273,7 +331,7 @@ export default function TasksPage() {
       document.body.appendChild(link);
       link.click();
       toast.success("Kalender berhasil diunduh.");
-    } catch (err) {
+    } catch {
       toast.error("Gagal mengekspor kalender.");
     }
   };
@@ -283,10 +341,31 @@ export default function TasksPage() {
      try {
        const res = await apiClient.get("/tasks/suggestions");
        setSuggestions(res.data);
-     } catch (err) {} finally { setIsSuggesting(false); }
+     } catch {
+       toast.error("Gagal mengambil saran AI.");
+     } finally { setIsSuggesting(false); }
   };
 
-  const filteredTasks = tasks.filter(t => 
+  const adoptSuggestion = async (suggestion: Suggestion) => {
+    try {
+      await apiClient.post('/tasks', {
+        title: suggestion.title,
+        description: suggestion.description,
+        priority: suggestion.priority || 'MEDIUM',
+        category: suggestion.category || 'Lainnya',
+        dueDate: '',
+        assigneeId: '',
+      });
+      toast.success('Saran tugas berhasil ditambahkan ke agenda.');
+      setSuggestions([]);
+      fetchTasks(viewMode);
+    } catch {
+      toast.error('Gagal menambahkan tugas dari saran AI.');
+    }
+  };
+
+  const taskItems = tasks as Task[];
+  const filteredTasks = viewMode === 'history' ? tasks : taskItems.filter(t => 
     t.title.toLowerCase().includes(search.toLowerCase()) ||
     t.category?.toLowerCase().includes(search.toLowerCase())
   );
@@ -350,7 +429,7 @@ export default function TasksPage() {
                         <Badge className="bg-emerald-500 text-white rounded-full text-[8px] font-black mb-3">{s.category}</Badge>
                         <h4 className="text-white font-bold leading-tight mb-2 text-lg">{s.title}</h4>
                         <p className="text-emerald-200/50 text-xs mb-6 h-8 overflow-hidden">{s.description}</p>
-                        <Button className="w-full bg-white text-emerald-950 hover:bg-emerald-50 rounded-xl font-bold h-10">Adopt Tugas</Button>
+                        <Button onClick={() => adoptSuggestion(s)} className="w-full bg-white text-emerald-950 hover:bg-emerald-50 rounded-xl font-bold h-10">Adopsi Tugas</Button>
                      </div>
                    ))}
                 </div>
@@ -398,10 +477,10 @@ export default function TasksPage() {
                  <div key={status} className="w-80 flex flex-col h-full bg-slate-50/50 rounded-[40px] border border-slate-100 p-6">
                     <div className="flex items-center justify-between mb-6">
                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">{status.replace('_', ' ')}</h4>
-                       <Badge variant="outline" className="rounded-full bg-white text-slate-400 border-slate-100 font-bold">{tasks.filter(t => t.status === status).length}</Badge>
+                       <Badge variant="outline" className="rounded-full bg-white text-slate-400 border-slate-100 font-bold">{taskItems.filter(t => t.status === status).length}</Badge>
                     </div>
                     <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-hide">
-                       {tasks.filter(t => t.status === status).map(task => (
+                       {taskItems.filter(t => t.status === status).map(task => (
                          <motion.div key={task.id} layout layoutId={task.id}>
                             <Card className="rounded-[28px] border-emerald-50 shadow-sm p-5 cursor-pointer hover:shadow-lg transition-all group" onClick={() => fetchTaskDetail(task.id)}>
                                <div className="flex justify-between items-start mb-3">
@@ -439,21 +518,32 @@ export default function TasksPage() {
 
          <TabsContent value="shopping" className="mt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-               {tasks.filter(t => t.category === 'Belanja').map(task => (
-                  <Card key={task.id} className="rounded-[32px] border-emerald-100 p-6 hover:shadow-lg transition-all">
-                     <div className="flex justify-between items-center mb-4">
-                        <h4 className="font-bold text-emerald-950">{task.title}</h4>
+               {taskItems.filter(t => t.category?.toLowerCase() === 'belanja').map(task => (
+                  <Card key={task.id} className="rounded-[32px] border-emerald-100 p-6 hover:shadow-lg transition-all bg-white">
+                     <div className="flex justify-between items-start gap-3 mb-4">
+                        <div>
+                           <h4 className="font-bold text-emerald-950">{task.title}</h4>
+                           <p className="text-[10px] text-slate-400 mt-1">{task.description || 'Daftar belanja khusus keluarga'}</p>
+                        </div>
                         <PriorityBadge priority={task.priority} />
                      </div>
-                     <div className="space-y-2 mb-6">
+                     <div className="space-y-3 mb-6">
                         {task.checklists?.map((item: any) => (
-                           <div key={item.id} className="flex items-center gap-3">
-                              <div className={cn("w-3 h-3 rounded-full border", item.isDone ? "bg-emerald-500 border-emerald-500" : "border-slate-300")} />
-                              <span className={cn("text-xs font-medium", item.isDone ? "line-through text-slate-400" : "text-slate-600")}>{item.title}</span>
-                           </div>
+                           <button key={item.id} onClick={() => toggleChecklistItem(item)} className="w-full flex items-center gap-3 rounded-3xl border px-4 py-3 text-left transition hover:border-emerald-200">
+                              <div className={cn("w-4 h-4 rounded-full border flex items-center justify-center", item.isDone ? "bg-emerald-500 border-emerald-500" : "border-slate-300")}> 
+                                {item.isDone && <CheckCircle size={12} className="text-white" />} 
+                              </div>
+                              <span className={cn("text-sm font-medium", item.isDone ? "line-through text-slate-400" : "text-slate-700")}>{item.title}</span>
+                           </button>
                         ))}
+                        {task.checklists?.length === 0 && (
+                           <p className="text-xs text-slate-500">Belum ada daftar item. Tambahkan detail belanja di halaman detail tugas.</p>
+                        )}
                      </div>
-                     <Button onClick={() => fetchTaskDetail(task.id)} variant="ghost" className="w-full rounded-2xl text-[10px] font-black uppercase text-emerald-700 bg-emerald-50">Detail Belanja</Button>
+                     <div className="flex gap-3">
+                        <Button onClick={() => fetchTaskDetail(task.id)} variant="ghost" className="flex-1 rounded-2xl text-[10px] font-black uppercase text-emerald-700 bg-emerald-50">Detail Belanja</Button>
+                        <Button onClick={() => toggleStatus(task.id, task.status)} className="flex-1 rounded-2xl bg-emerald-600 text-white text-[10px] font-black uppercase hover:bg-emerald-700">Selesai</Button>
+                     </div>
                   </Card>
                ))}
             </div>
@@ -474,7 +564,7 @@ export default function TasksPage() {
                         <h4 className="text-xl font-black text-emerald-950 mb-2">{bill.title}</h4>
                         <p className="text-xs text-slate-500 mb-6 font-medium line-clamp-2">{bill.description}</p>
                         
-                        <div className="flex items-center gap-3 mb-8">
+                        <div className="flex items-center gap-2">
                            <div className="p-2 bg-emerald-50 rounded-xl">
                               <Calendar size={16} className="text-emerald-600" />
                            </div>
@@ -496,7 +586,7 @@ export default function TasksPage() {
                                     toast.success("Alhamdulillah! Tagihan berhasil dibayar.");
                                     fetchBills();
                                     fetchTasks(viewMode);
-                                 } catch (err) {
+                                 } catch {
                                     toast.error("Gagal membayar tagihan. Pastikan saldo cukup.");
                                  }
                               }}
@@ -512,18 +602,29 @@ export default function TasksPage() {
 
          <TabsContent value="history" className="mt-0">
             <div className="space-y-4">
-               {tasks.map(task => (
-                 <Card key={task.id} className="rounded-[28px] border-slate-100 bg-white/50 p-4 opacity-75 grayscale-[0.3]">
-                    <div className="flex items-center gap-4">
-                       <CheckCircle2 size={24} className="text-emerald-500" />
-                       <div className="flex-1">
-                          <h5 className="font-bold text-slate-800">{task.title}</h5>
-                          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Selesai pada {new Date(task.updatedAt).toLocaleDateString()}</p>
-                       </div>
-                       <Badge variant="outline" className="rounded-full">{task.assignee?.name}</Badge>
-                    </div>
-                 </Card>
-               ))}
+               {tasks.length === 0 ? (
+                 <EmptyState />
+               ) : (
+                 tasks.map((entry: any) => (
+                   <Card key={entry.id} className="rounded-[28px] border-slate-100 bg-white p-4 shadow-sm">
+                      <div className="flex items-start gap-4">
+                         <div className="mt-1 rounded-2xl bg-emerald-50 p-3">
+                           <CheckCircle2 size={18} className="text-emerald-500" />
+                         </div>
+                         <div className="flex-1">
+                           <div className="flex items-center justify-between gap-4 mb-2">
+                              <div>
+                                <h5 className="text-sm font-black text-emerald-950">{entry.action.replace(/TASK_/g, '').replaceAll('_', ' ')}</h5>
+                                <p className="text-[10px] uppercase text-slate-400 tracking-[0.2em]">{new Date(entry.createdAt).toLocaleDateString()} • {new Date(entry.createdAt).toLocaleTimeString()}</p>
+                              </div>
+                              <Badge variant="outline" className="rounded-full text-[10px] uppercase tracking-[0.2em]">{entry.user?.name || 'Sistem'}</Badge>
+                           </div>
+                           <p className="text-sm text-slate-600 leading-relaxed">{entry.details || 'Tidak ada detail tambahan.'}</p>
+                         </div>
+                      </div>
+                   </Card>
+                 ))
+               )}
             </div>
          </TabsContent>
       </Tabs>
@@ -645,7 +746,7 @@ export default function TasksPage() {
                                           fetchTaskDetail(selectedTask.id);
                                           fetchBills();
                                           toast.success("Tagihan lunas!");
-                                       } catch (err) {
+                                       } catch {
                                           toast.error("Gagal membayar.");
                                        }
                                     }}
@@ -707,7 +808,7 @@ export default function TasksPage() {
                        <div className="grid grid-cols-3 gap-4">
                           {selectedTask.attachments?.map((a: any) => (
                              <div key={a.id} className="relative aspect-square rounded-2xl overflow-hidden border border-emerald-100 group">
-                                <img src={a.url} alt={a.name} className="w-full h-full object-cover" />
+                                <Image src={a.url} alt={a.name} fill className="object-cover" />
                                 <div className="absolute inset-0 bg-emerald-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                    <button onClick={() => deleteAttachment(a.id)} className="p-2 bg-white/20 hover:bg-rose-500 text-white rounded-full transition-colors"><Trash2 size={16} /></button>
                                 </div>
@@ -728,7 +829,7 @@ export default function TasksPage() {
                           {selectedTask.comments?.map((c: any) => (
                              <div key={c.id} className="flex gap-4">
                                 <div className="w-8 h-8 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
-                                   {c.user.image ? <img src={c.user.image} alt="" className="w-full h-full object-cover" /> : <UserIcon size={14} className="m-auto mt-2 text-slate-400" />}
+                                   {c.user.image ? <Image src={c.user.image} alt={c.user.name} fill className="object-cover" sizes="32px" /> : <UserIcon size={14} className="m-auto mt-2 text-slate-400" />}
                                 </div>
                                 <div className="flex-1">
                                    <div className="flex items-center gap-2 mb-1">
@@ -760,8 +861,8 @@ export default function TasksPage() {
   );
 }
 
-function TaskCard({ task, onClick, onToggle, compact = false, bills = [] }: any) {
-   const linkedBill = bills.find((b: any) => b.id === task.billId);
+function TaskCard({ task, onClick, onToggle, compact = false, bills = [] }: { task: Task; onClick: () => void; onToggle: () => void; compact?: boolean; bills?: BillSummary[] }) {
+   const linkedBill = bills.find((b) => b.id === task.billId);
    return (
       <Card onClick={onClick} className={cn("group relative overflow-hidden rounded-[36px] bg-white border-emerald-50 hover:border-emerald-200 transition-all hover:shadow-2xl hover:shadow-emerald-900/5 cursor-pointer", task.status === 'COMPLETED' && "opacity-50")}>
          <CardContent className={cn("p-8", compact && "p-5")}>
@@ -794,8 +895,8 @@ function TaskCard({ task, onClick, onToggle, compact = false, bills = [] }: any)
 
             <div className="flex items-center justify-between pt-6 border-t border-emerald-50">
                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm">
-                     {task.assignee?.image ? <img src={task.assignee.image} alt="" className="w-full h-full object-cover" /> : <UserIcon size={14} className="text-slate-300" />}
+                  <div className="relative w-8 h-8 rounded-xl bg-slate-100 overflow-hidden border-2 border-white shadow-sm">
+                     {task.assignee?.image ? <Image src={task.assignee.image} alt={task.assignee.name || 'Assignee'} fill className="object-cover" sizes="32px" /> : <UserIcon size={14} className="text-slate-300" />}
                   </div>
                   <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{task.assignee?.name || 'Unassigned'}</span>
                </div>
@@ -809,7 +910,7 @@ function TaskCard({ task, onClick, onToggle, compact = false, bills = [] }: any)
 }
 
 function PriorityBadge({ priority }: { priority: string }) {
-  const colors: any = { URGENT: 'rose', HIGH: 'orange', MEDIUM: 'amber', LOW: 'emerald' };
+  const colors: Record<string, string> = { URGENT: 'rose', HIGH: 'orange', MEDIUM: 'amber', LOW: 'emerald' };
   const color = colors[priority] || 'slate';
   return (
     <Badge className={cn("rounded-full text-[8px] font-black tracking-widest py-0", `bg-${color}-100 text-${color}-600`)}>
@@ -837,6 +938,6 @@ function EmptyState() {
    );
 }
 
-function Loader2(props: any) {
+function Loader2(props: ComponentProps<typeof Circle>) {
   return <Circle {...props} className={cn("animate-spin", props.className)} />;
 }

@@ -1,4 +1,8 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
@@ -65,11 +69,11 @@ export class AuthService {
       }),
     ]);
 
-    const payload = { 
-      email: user.email, 
-      sub: user.id, 
+    const payload = {
+      email: user.email,
+      sub: user.id,
       role: user.role,
-      familyId: user.familyId // Important for frontend middleware
+      familyId: user.familyId, // Important for frontend middleware
     };
 
     return {

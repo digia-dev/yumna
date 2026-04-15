@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { ScheduleService } from './schedule.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -13,15 +22,14 @@ export class ScheduleController {
   }
 
   @Post('reminders')
-  async createReminder(@Req() req: any, @Body() body: { title: string; content?: string; remindAt: string }) {
-    return this.scheduleService.createReminder(
-      req.user.id,
-      req.user.familyId,
-      {
-        ...body,
-        remindAt: new Date(body.remindAt),
-      }
-    );
+  async createReminder(
+    @Req() req: any,
+    @Body() body: { title: string; content?: string; remindAt: string },
+  ) {
+    return this.scheduleService.createReminder(req.user.id, req.user.familyId, {
+      ...body,
+      remindAt: new Date(body.remindAt),
+    });
   }
 
   @Delete('reminders/:id')

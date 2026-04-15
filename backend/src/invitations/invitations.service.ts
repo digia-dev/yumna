@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
 import { CreateInvitationDto } from './dto/invitation.dto';
@@ -27,7 +31,9 @@ export class InvitationsService {
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days validity
 
     // 3. Get family info for email
-    const family = await this.prisma.family.findUnique({ where: { id: familyId } });
+    const family = await this.prisma.family.findUnique({
+      where: { id: familyId },
+    });
 
     // 4. Save invitation
     const invitation = await this.prisma.familyInvitation.create({
@@ -42,7 +48,11 @@ export class InvitationsService {
 
     // 5. Send Email
     try {
-      await this.mailService.sendInvitation(dto.email, family?.name || 'Yumna Family', token);
+      await this.mailService.sendInvitation(
+        dto.email,
+        family?.name || 'Yumna Family',
+        token,
+      );
     } catch (e) {
       console.error('Failed to send invitation email:', e);
       // We still return invitation, user can copy code from UI if email fails
@@ -74,9 +84,9 @@ export class InvitationsService {
     return await this.prisma.$transaction(async (tx) => {
       await tx.user.update({
         where: { id: userId },
-        data: { 
+        data: {
           familyId: invitation.familyId,
-          role: invitation.role 
+          role: invitation.role,
         },
       });
 

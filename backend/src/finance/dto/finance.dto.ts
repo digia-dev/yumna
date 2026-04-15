@@ -1,4 +1,11 @@
-import { IsNumber, IsString, IsEnum, IsOptional, Min, IsNotEmpty } from 'class-validator';
+import {
+  IsNumber,
+  IsString,
+  IsEnum,
+  IsOptional,
+  Min,
+  IsNotEmpty,
+} from 'class-validator';
 import { TransactionType } from '@prisma/client';
 
 export class CreateTransactionDto {

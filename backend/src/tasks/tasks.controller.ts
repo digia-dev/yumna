@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
@@ -52,7 +61,8 @@ export class TasksController {
   async applyTemplate(
     @GetUser('id') userId: string,
     @GetUser('familyId') familyId: string,
-    @Body('templateType') templateType: 'RAMADAN' | 'HOUSEHOLD_DAILY' | 'FINANCE_WEEKLY'
+    @Body('templateType')
+    templateType: 'RAMADAN' | 'HOUSEHOLD_DAILY' | 'FINANCE_WEEKLY',
   ) {
     return this.tasksService.applyTemplate(familyId, userId, templateType);
   }
@@ -67,7 +77,7 @@ export class TasksController {
     @Param('id') taskId: string,
     @GetUser('familyId') familyId: string,
     @Body('url') url: string,
-    @Body('name') name: string
+    @Body('name') name: string,
   ) {
     return this.tasksService.addAttachment(taskId, familyId, url, name);
   }
@@ -118,8 +128,9 @@ export class TasksController {
   @Delete(':id')
   async remove(
     @Param('id') id: string,
+    @GetUser('id') userId: string,
     @GetUser('familyId') familyId: string,
   ) {
-    return this.tasksService.remove(id, familyId);
+    return this.tasksService.remove(id, userId, familyId);
   }
 }

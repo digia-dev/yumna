@@ -37,7 +37,11 @@ export class PasswordService {
       where: { resetToken: token },
     });
 
-    if (!user || !user.resetTokenExpires || new Date() > user.resetTokenExpires) {
+    if (
+      !user ||
+      !user.resetTokenExpires ||
+      new Date() > user.resetTokenExpires
+    ) {
       throw new BadRequestException('Invalid or expired token.');
     }
 

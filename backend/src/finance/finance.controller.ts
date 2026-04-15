@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Body, UseGuards, Put, Param, Delete, Query, Res, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Put,
+  Param,
+  Delete,
+  Query,
+  Res,
+  Patch,
+} from '@nestjs/common';
 import type { Response } from 'express';
 import { FinanceService } from './finance.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -57,10 +69,7 @@ export class FinanceController {
   }
 
   @Post('debts')
-  async createDebt(
-    @GetUser('familyId') familyId: string,
-    @Body() body: any,
-  ) {
+  async createDebt(@GetUser('familyId') familyId: string, @Body() body: any) {
     return this.financeService.createDebt(familyId, body);
   }
 
@@ -82,7 +91,12 @@ export class FinanceController {
     @GetUser('familyId') familyId: string,
     @Body() body: { name: string; type?: TransactionType; icon?: string },
   ) {
-    return this.financeService.createCategory(familyId, body.name, body.type, body.icon);
+    return this.financeService.createCategory(
+      familyId,
+      body.name,
+      body.type,
+      body.icon,
+    );
   }
 
   @Delete('categories/:id')
@@ -139,7 +153,10 @@ export class FinanceController {
     @GetUser('familyId') familyId: string,
   ) {
     const startTime = Date.now();
-    const result = await this.financeService.runPerformanceTest(userId, familyId);
+    const result = await this.financeService.runPerformanceTest(
+      userId,
+      familyId,
+    );
     const endTime = Date.now();
     return { ...result, totalExecutionTime: endTime - startTime };
   }
@@ -151,7 +168,12 @@ export class FinanceController {
     @GetUser('familyId') familyId: string,
     @Body() body: { transactions: any[] },
   ) {
-    return this.financeService.bulkImportTransactions(userId, familyId, walletId, body.transactions);
+    return this.financeService.bulkImportTransactions(
+      userId,
+      familyId,
+      walletId,
+      body.transactions,
+    );
   }
 
   @Get('transactions/export')
@@ -161,7 +183,10 @@ export class FinanceController {
   ) {
     const csv = await this.financeService.exportTransactionsToCSV(familyId);
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename=transactions.csv');
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=transactions.csv',
+    );
     return res.status(200).send(csv);
   }
 
@@ -182,7 +207,13 @@ export class FinanceController {
   async transfer(
     @GetUser('id') userId: string,
     @GetUser('familyId') familyId: string,
-    @Body() body: { fromWalletId: string; toWalletId: string; amount: number; description?: string },
+    @Body()
+    body: {
+      fromWalletId: string;
+      toWalletId: string;
+      amount: number;
+      description?: string;
+    },
   ) {
     return this.financeService.transferBetweenWallets(userId, familyId, body);
   }

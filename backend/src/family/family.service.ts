@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -56,9 +60,9 @@ export class FamilyService {
 
     return this.prisma.user.update({
       where: { id: memberId },
-      data: { 
+      data: {
         familyId: null,
-        role: 'ANAK'
+        role: 'ANAK',
       },
     });
   }
@@ -73,14 +77,16 @@ export class FamilyService {
     }
 
     if (user.role === 'KEPALA_KELUARGA') {
-      throw new BadRequestException('Head of Family cannot leave. Please transfer ownership or delete family.');
+      throw new BadRequestException(
+        'Head of Family cannot leave. Please transfer ownership or delete family.',
+      );
     }
 
     return this.prisma.user.update({
       where: { id: userId },
-      data: { 
+      data: {
         familyId: null,
-        role: 'ANAK'
+        role: 'ANAK',
       },
     });
   }

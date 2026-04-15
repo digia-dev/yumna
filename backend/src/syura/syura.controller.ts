@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, UseGuards, Param, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Param,
+  Patch,
+} from '@nestjs/common';
 import { SyuraService } from './syura.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
@@ -24,12 +32,18 @@ export class SyuraController {
   }
 
   @Post('topics')
-  async createTopic(@GetUser('familyId') familyId: string, @Body() body: { title: string }) {
+  async createTopic(
+    @GetUser('familyId') familyId: string,
+    @Body() body: { title: string },
+  ) {
     return this.syuraService.createTopic(familyId, body.title);
   }
 
   @Patch('topics/:id')
-  async toggleTopic(@GetUser('familyId') familyId: string, @Param('id') id: string) {
+  async toggleTopic(
+    @GetUser('familyId') familyId: string,
+    @Param('id') id: string,
+  ) {
     return this.syuraService.toggleTopic(id, familyId);
   }
 }

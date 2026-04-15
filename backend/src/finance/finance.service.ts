@@ -1,4 +1,11 @@
-import { Injectable, ForbiddenException, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+  BadRequestException,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { TransactionType } from '@prisma/client';
 import { GamificationService } from '../gamification/gamification.service';
@@ -25,7 +32,11 @@ export class FinanceService {
   /**
    * Create a new wallet
    */
-  async createWallet(userId: string, familyId: string, data: { name: string; balance: number; currency?: string; type?: string }) {
+  async createWallet(
+    userId: string,
+    familyId: string,
+    data: { name: string; balance: number; currency?: string; type?: string },
+  ) {
     return this.prisma.wallet.create({
       data: {
         ...data,
@@ -38,7 +49,16 @@ export class FinanceService {
   /**
    * Update an existing wallet
    */
-  async updateWallet(walletId: string, familyId: string, data: Partial<{ name: string; balance: number; currency: string; type: string }>) {
+  async updateWallet(
+    walletId: string,
+    familyId: string,
+    data: Partial<{
+      name: string;
+      balance: number;
+      currency: string;
+      type: string;
+    }>,
+  ) {
     const wallet = await this.prisma.wallet.findFirst({
       where: { id: walletId, familyId, isDeleted: false },
     });
@@ -72,18 +92,22 @@ export class FinanceService {
   /**
    * Create a new transaction and update wallet balance
    */
-  async createTransaction(userId: string, familyId: string, data: {
-    walletId: string;
-    amount: number;
-    type: TransactionType;
-    category: string;
-    description?: string;
-    tags?: string[];
-    savingsGoalId?: string;
-    attachmentUrl?: string;
-    location?: any;
-    metadata?: any;
-  }) {
+  async createTransaction(
+    userId: string,
+    familyId: string,
+    data: {
+      walletId: string;
+      amount: number;
+      type: TransactionType;
+      category: string;
+      description?: string;
+      tags?: string[];
+      savingsGoalId?: string;
+      attachmentUrl?: string;
+      location?: any;
+      metadata?: any;
+    },
+  ) {
     // 0. Check for Child Allowance
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -93,7 +117,7 @@ export class FinanceService {
     if (user?.role === 'ANAK' && user.allowanceLimit) {
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      
+
       const monthlySpent = await this.prisma.transaction.aggregate({
         where: {
           userId,
@@ -106,7 +130,9 @@ export class FinanceService {
 
       const currentTotal = Number(monthlySpent._sum.amount || 0);
       if (currentTotal + data.amount > Number(user.allowanceLimit)) {
-        throw new Error(`Batas uang saku terlampaui! Sisa limit: ${Number(user.allowanceLimit) - currentTotal}`);
+        throw new Error(
+          `Batas uang saku terlampaui! Sisa limit: ${Number(user.allowanceLimit) - currentTotal}`,
+        );
       }
     }
 
@@ -115,7 +141,8 @@ export class FinanceService {
       where: { id: data.walletId, familyId, isDeleted: false },
     });
 
-    if (!wallet) throw new NotFoundException('Wallet not found or not in family');
+    if (!wallet)
+      throw new NotFoundException('Wallet not found or not in family');
 
     // 1.1 Check Granular Permissions
     const permissions = await this.prisma.walletPermission.findFirst({
@@ -123,7 +150,9 @@ export class FinanceService {
     });
 
     if (permissions && !permissions.canEdit) {
-      throw new Error('Anda tidak memiliki izin untuk mencatat transaksi di dompet ini.');
+      throw new Error(
+        'Anda tidak memiliki izin untuk mencatat transaksi di dompet ini.',
+      );
     }
 
     // 2. Perform transaction in a transaction block
@@ -147,8 +176,9 @@ export class FinanceService {
       });
 
       // Update Wallet Balance
-      const balanceChange = data.type === TransactionType.INCOME ? data.amount : -data.amount;
-      
+      const balanceChange =
+        data.type === TransactionType.INCOME ? data.amount : -data.amount;
+
       await tx.wallet.update({
         where: { id: data.walletId },
         data: {
@@ -173,12 +203,12 @@ export class FinanceService {
         });
 
         // Notify Family Head if not the same person
-        const head = family.members.find(m => m.role === 'KEPALA_KELUARGA');
+        const head = family.members.find((m) => m.role === 'KEPALA_KELUARGA');
         if (head && head.id !== userId) {
           await tx.notification.create({
             data: {
               title: 'Laporan Keuangan Baru',
-              message: `${family.members.find(m => m.id === userId)?.name} mencatat ${data.type.toLowerCase()} ${data.category}.`,
+              message: `${family.members.find((m) => m.id === userId)?.name} mencatat ${data.type.toLowerCase()} ${data.category}.`,
               userId: head.id,
             },
           });
@@ -187,7 +217,8 @@ export class FinanceService {
 
       if (data.savingsGoalId) {
         // Simple logic: Income increases goal, Expense decreases it
-        const goalChange = data.type === TransactionType.INCOME ? data.amount : -data.amount;
+        const goalChange =
+          data.type === TransactionType.INCOME ? data.amount : -data.amount;
         await tx.savingsGoal.update({
           where: { id: data.savingsGoalId },
           data: { currentAmount: { increment: goalChange } },
@@ -195,12 +226,20 @@ export class FinanceService {
 
         // Task 328: Add points for saving
         if (data.type === TransactionType.INCOME) {
-          await this.gamificationService.addPoints(familyId, 50, 'Menyisihkan uang untuk tujuan masa depan.');
+          await this.gamificationService.addPoints(
+            familyId,
+            50,
+            'Menyisihkan uang untuk tujuan masa depan.',
+          );
         }
       }
 
       // Task 328: points for recording
-      await this.gamificationService.addPoints(familyId, 10, 'Mencatat transaksi keluarga.');
+      await this.gamificationService.addPoints(
+        familyId,
+        10,
+        'Mencatat transaksi keluarga.',
+      );
 
       return transaction;
     });
@@ -217,7 +256,8 @@ export class FinanceService {
         where: { familyId, isDeleted: false },
         orderBy: { balance: 'desc' },
       });
-      if (!defaultWallet) throw new NotFoundException('No wallet available for family');
+      if (!defaultWallet)
+        throw new NotFoundException('No wallet available for family');
       walletId = defaultWallet.id;
     }
 
@@ -253,14 +293,20 @@ export class FinanceService {
   /**
    * Transfer money between wallets
    */
-  async transferBetweenWallets(userId: string, familyId: string, data: {
-    fromWalletId: string;
-    toWalletId: string;
-    amount: number;
-    description?: string;
-  }) {
+  async transferBetweenWallets(
+    userId: string,
+    familyId: string,
+    data: {
+      fromWalletId: string;
+      toWalletId: string;
+      amount: number;
+      description?: string;
+    },
+  ) {
     if (data.fromWalletId === data.toWalletId) {
-      throw new BadRequestException('Source and destination wallets must be different');
+      throw new BadRequestException(
+        'Source and destination wallets must be different',
+      );
     }
 
     const { fromWalletId, toWalletId, amount, description } = data;
@@ -274,8 +320,10 @@ export class FinanceService {
         where: { id: toWalletId, familyId, isDeleted: false },
       });
 
-      if (!fromWallet || !toWallet) throw new NotFoundException('One or both wallets not found');
-      if (Number(fromWallet.balance) < amount) throw new BadRequestException('Insufficient balance');
+      if (!fromWallet || !toWallet)
+        throw new NotFoundException('One or both wallets not found');
+      if (Number(fromWallet.balance) < amount)
+        throw new BadRequestException('Insufficient balance');
 
       // 2. Create Transaction record (the "Transfer")
       const transaction = await tx.transaction.create({
@@ -283,7 +331,9 @@ export class FinanceService {
           amount,
           type: TransactionType.TRANSFER,
           category: 'Transfer',
-          description: description || `Transfer of ${amount} from ${fromWallet.name} to ${toWallet.name}`,
+          description:
+            description ||
+            `Transfer of ${amount} from ${fromWallet.name} to ${toWallet.name}`,
           userId,
           familyId,
           walletId: fromWalletId,
@@ -309,17 +359,21 @@ export class FinanceService {
   /**
    * Update an existing transaction and adjust wallet balance
    */
-  async updateTransaction(transactionId: string, familyId: string, data: Partial<{
-    amount: number;
-    type: TransactionType;
-    category: string;
-    description: string;
-    walletId: string;
-    tags: string[];
-    attachmentUrl: string;
-    location: any;
-    metadata: any;
-  }>) {
+  async updateTransaction(
+    transactionId: string,
+    familyId: string,
+    data: Partial<{
+      amount: number;
+      type: TransactionType;
+      category: string;
+      description: string;
+      walletId: string;
+      tags: string[];
+      attachmentUrl: string;
+      location: any;
+      metadata: any;
+    }>,
+  ) {
     const oldTransaction = await this.prisma.transaction.findFirst({
       where: { id: transactionId, wallet: { familyId } },
     });
@@ -328,9 +382,10 @@ export class FinanceService {
 
     return this.prisma.$transaction(async (tx) => {
       // 1. Revert old balance
-      const revertAmount = oldTransaction.type === TransactionType.INCOME 
-        ? -Number(oldTransaction.amount) 
-        : Number(oldTransaction.amount);
+      const revertAmount =
+        oldTransaction.type === TransactionType.INCOME
+          ? -Number(oldTransaction.amount)
+          : Number(oldTransaction.amount);
 
       await tx.wallet.update({
         where: { id: oldTransaction.walletId },
@@ -346,11 +401,13 @@ export class FinanceService {
       });
 
       // 3. Apply new balance
-      const newAmount = data.amount !== undefined ? data.amount : Number(oldTransaction.amount);
+      const newAmount =
+        data.amount !== undefined ? data.amount : Number(oldTransaction.amount);
       const newType = data.type || oldTransaction.type;
       const newWalletId = data.walletId || oldTransaction.walletId;
 
-      const applyAmount = newType === TransactionType.INCOME ? newAmount : -newAmount;
+      const applyAmount =
+        newType === TransactionType.INCOME ? newAmount : -newAmount;
 
       await tx.wallet.update({
         where: { id: newWalletId },
@@ -379,9 +436,10 @@ export class FinanceService {
       });
 
       // Revert balance
-      const revertAmount = transaction.type === TransactionType.INCOME 
-        ? -Number(transaction.amount) 
-        : Number(transaction.amount);
+      const revertAmount =
+        transaction.type === TransactionType.INCOME
+          ? -Number(transaction.amount)
+          : Number(transaction.amount);
 
       await tx.wallet.update({
         where: { id: transaction.walletId },
@@ -412,13 +470,13 @@ export class FinanceService {
 
     // Initialize daily data
     for (let i = 0; i < 30; i++) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
-        dailyData[dateStr] = { income: 0, expense: 0 };
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      dailyData[dateStr] = { income: 0, expense: 0 };
     }
 
-    transactions.forEach(tx => {
+    transactions.forEach((tx) => {
       const dateStr = tx.date.toISOString().split('T')[0];
       if (dailyData[dateStr]) {
         if (tx.type === TransactionType.INCOME) {
@@ -439,8 +497,18 @@ export class FinanceService {
    */
   async getCategorySpending(familyId: string, month?: string) {
     const now = new Date();
-    const startDate = month ? new Date(`${month}-01`) : new Date(now.getFullYear(), now.getMonth(), 1);
-    const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0, 23, 59, 59, 999);
+    const startDate = month
+      ? new Date(`${month}-01`)
+      : new Date(now.getFullYear(), now.getMonth(), 1);
+    const endDate = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
 
     const transactions = await this.prisma.transaction.findMany({
       where: {
@@ -452,7 +520,7 @@ export class FinanceService {
     });
 
     const totals: Record<string, number> = {};
-    transactions.forEach(tx => {
+    transactions.forEach((tx) => {
       totals[tx.category] = (totals[tx.category] || 0) + Number(tx.amount);
     });
 
@@ -476,9 +544,10 @@ export class FinanceService {
           });
 
           // Revert balance
-          const revertAmount = transaction.type === TransactionType.INCOME 
-            ? -Number(transaction.amount) 
-            : Number(transaction.amount);
+          const revertAmount =
+            transaction.type === TransactionType.INCOME
+              ? -Number(transaction.amount)
+              : Number(transaction.amount);
 
           await tx.wallet.update({
             where: { id: transaction.walletId },
@@ -495,8 +564,18 @@ export class FinanceService {
    */
   async getFinancialSummary(familyId: string, month?: string) {
     const now = new Date();
-    const startDate = month ? new Date(`${month}-01`) : new Date(now.getFullYear(), now.getMonth(), 1);
-    const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0, 23, 59, 59, 999);
+    const startDate = month
+      ? new Date(`${month}-01`)
+      : new Date(now.getFullYear(), now.getMonth(), 1);
+    const endDate = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
 
     const transactions = await this.prisma.transaction.findMany({
       where: {
@@ -509,7 +588,7 @@ export class FinanceService {
     let totalIncome = 0;
     let totalExpense = 0;
 
-    transactions.forEach(tx => {
+    transactions.forEach((tx) => {
       if (tx.type === TransactionType.INCOME) {
         totalIncome += Number(tx.amount);
       } else if (tx.type === TransactionType.EXPENSE) {
@@ -551,7 +630,7 @@ export class FinanceService {
       take: limit,
     });
 
-    return result.map(item => ({
+    return result.map((item) => ({
       category: item.category,
       amount: Number(item._sum?.amount || 0),
     }));
@@ -563,12 +642,24 @@ export class FinanceService {
   async exportTransactionsToCSV(familyId: string) {
     const transactions = await this.prisma.transaction.findMany({
       where: { familyId, isDeleted: false },
-      include: { wallet: { select: { name: true } }, user: { select: { name: true } } },
+      include: {
+        wallet: { select: { name: true } },
+        user: { select: { name: true } },
+      },
       orderBy: { date: 'desc' },
     });
 
-    const header = ['Date', 'Type', 'Category', 'Description', 'Amount', 'Wallet', 'User', 'Tags'].join(',');
-    const rows = transactions.map(tx => {
+    const header = [
+      'Date',
+      'Type',
+      'Category',
+      'Description',
+      'Amount',
+      'Wallet',
+      'User',
+      'Tags',
+    ].join(',');
+    const rows = transactions.map((tx) => {
       return [
         tx.date.toISOString(),
         tx.type,
@@ -599,7 +690,10 @@ export class FinanceService {
     const budgets = await this.prisma.budget.findMany({
       where: { familyId, period },
     });
-    const totalBudgeted = budgets.reduce((acc: number, b: any) => acc + Number(b.amount), 0);
+    const totalBudgeted = budgets.reduce(
+      (acc: number, b: any) => acc + Number(b.amount),
+      0,
+    );
 
     return {
       totalBalance,
@@ -614,11 +708,11 @@ export class FinanceService {
    */
   async getHealthScore(familyId: string) {
     const summary = await this.getFinancialSummary(familyId);
-    
+
     if (summary.income === 0) return { score: 0, status: 'NO_DATA' };
 
     const savingsRatio = (summary.income - summary.expense) / summary.income;
-    
+
     let score = Math.round(savingsRatio * 100);
     if (score < 0) score = 0;
     if (score > 100) score = 100;
@@ -640,7 +734,12 @@ export class FinanceService {
   /**
    * Custom Category Management
    */
-  async createCategory(familyId: string, name: string, type?: TransactionType, icon?: string) {
+  async createCategory(
+    familyId: string,
+    name: string,
+    type?: TransactionType,
+    icon?: string,
+  ) {
     return this.prisma.customCategory.create({
       data: { familyId, name, type, icon },
     });
@@ -665,19 +764,19 @@ export class FinanceService {
   async getWealthBreakdown(familyId: string) {
     const wallets = await this.prisma.wallet.findMany({
       where: { familyId, isDeleted: false },
-      select: { type: true, balance: true }
+      select: { type: true, balance: true },
     });
 
     const breakdown: Record<string, number> = {
-      'CASH': 0,
-      'BANK': 0,
-      'INVESTMENT': 0,
-      'GOLD': 0,
-      'OTHER': 0
+      CASH: 0,
+      BANK: 0,
+      INVESTMENT: 0,
+      GOLD: 0,
+      OTHER: 0,
     };
 
     let total = 0;
-    wallets.forEach(w => {
+    wallets.forEach((w) => {
       const type = w.type || 'OTHER';
       const balance = Number(w.balance);
       breakdown[type] = (breakdown[type] || 0) + balance;
@@ -692,28 +791,28 @@ export class FinanceService {
         name: this.getWalletTypeName(name),
         val: Math.round((value / total) * 100),
         color: this.getWalletTypeColor(name),
-        amount: value
+        amount: value,
       }));
   }
 
   private getWalletTypeName(type: string) {
     const names: any = {
-      'CASH': 'Kas & Tabungan',
-      'BANK': 'Rekening Bank',
-      'INVESTMENT': 'Investasi/Saham',
-      'GOLD': 'Emas & Perhiasan',
-      'OTHER': 'Lainnya'
+      CASH: 'Kas & Tabungan',
+      BANK: 'Rekening Bank',
+      INVESTMENT: 'Investasi/Saham',
+      GOLD: 'Emas & Perhiasan',
+      OTHER: 'Lainnya',
     };
     return names[type] || type;
   }
 
   private getWalletTypeColor(type: string) {
     const colors: any = {
-      'CASH': 'bg-emerald-500',
-      'BANK': 'bg-blue-500',
-      'INVESTMENT': 'bg-purple-500',
-      'GOLD': 'bg-amber-400',
-      'OTHER': 'bg-slate-400'
+      CASH: 'bg-emerald-500',
+      BANK: 'bg-blue-500',
+      INVESTMENT: 'bg-purple-500',
+      GOLD: 'bg-amber-400',
+      OTHER: 'bg-slate-400',
     };
     return colors[type] || 'bg-slate-400';
   }
@@ -721,7 +820,16 @@ export class FinanceService {
   /**
    * Debt & Receivable Management
    */
-  async createDebt(familyId: string, data: { personName: string; amount: number; type: any; description?: string; dueDate?: Date }) {
+  async createDebt(
+    familyId: string,
+    data: {
+      personName: string;
+      amount: number;
+      type: any;
+      description?: string;
+      dueDate?: Date;
+    },
+  ) {
     return this.prisma.debt.create({
       data: {
         ...data,
@@ -753,7 +861,9 @@ export class FinanceService {
    * Performance Test: Seed and Query
    */
   async runPerformanceTest(userId: string, familyId: string) {
-    const wallet = await this.prisma.wallet.findFirst({ where: { familyId, isDeleted: false } });
+    const wallet = await this.prisma.wallet.findFirst({
+      where: { familyId, isDeleted: false },
+    });
     if (!wallet) throw new NotFoundException('No wallet found');
 
     const amountToSeed = 1000;
@@ -795,7 +905,12 @@ export class FinanceService {
   /**
    * Bulk Import with Deduplication (Auto-reconcile)
    */
-  async bulkImportTransactions(userId: string, familyId: string, walletId: string, data: any[]) {
+  async bulkImportTransactions(
+    userId: string,
+    familyId: string,
+    walletId: string,
+    data: any[],
+  ) {
     // 1. Get existing transactions for this month to check for duplicates
     const existing = await this.prisma.transaction.findMany({
       where: { walletId, isDeleted: false },
@@ -803,11 +918,13 @@ export class FinanceService {
     });
 
     const duplicates = new Set();
-    existing.forEach(t => {
-      duplicates.add(`${new Date(t.date).toISOString().split('T')[0]}_${t.amount}_${t.description}`);
+    existing.forEach((t) => {
+      duplicates.add(
+        `${new Date(t.date).toISOString().split('T')[0]}_${t.amount}_${t.description}`,
+      );
     });
 
-    const toImport = data.filter(t => {
+    const toImport = data.filter((t) => {
       const key = `${new Date(t.date).toISOString().split('T')[0]}_${t.amount}_${t.description}`;
       return !duplicates.has(key);
     });
@@ -833,7 +950,10 @@ export class FinanceService {
           },
         });
         created.push(t);
-        totalAmount += item.type === TransactionType.INCOME ? Number(item.amount) : -Number(item.amount);
+        totalAmount +=
+          item.type === TransactionType.INCOME
+            ? Number(item.amount)
+            : -Number(item.amount);
       }
 
       await tx.wallet.update({
@@ -841,7 +961,10 @@ export class FinanceService {
         data: { balance: { increment: totalAmount } },
       });
 
-      return { imported: created.length, skipped: data.length - created.length };
+      return {
+        imported: created.length,
+        skipped: data.length - created.length,
+      };
     });
   }
 
@@ -855,28 +978,37 @@ export class FinanceService {
     const [transactions, budgets, savings] = await Promise.all([
       this.prisma.transaction.findMany({
         where: { familyId, date: { gte: oneWeekAgo }, isDeleted: false },
-        orderBy: { date: 'desc' }
+        orderBy: { date: 'desc' },
       }),
       this.prisma.budget.findMany({ where: { familyId } }),
-      this.prisma.savingsGoal.findMany({ where: { familyId } })
+      this.prisma.savingsGoal.findMany({ where: { familyId } }),
     ]);
 
-    const income = transactions.filter(t => t.type === 'INCOME').reduce((sum, t) => sum + Number(t.amount), 0);
-    const expense = transactions.filter(t => t.type === 'EXPENSE').reduce((sum, t) => sum + Number(t.amount), 0);
+    const income = transactions
+      .filter((t) => t.type === 'INCOME')
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+    const expense = transactions
+      .filter((t) => t.type === 'EXPENSE')
+      .reduce((sum, t) => sum + Number(t.amount), 0);
 
     return {
       period: 'Past 7 Days',
       income,
       expense,
       balance: income - expense,
-      topExpenseCategories: this.calculateCategoryBreakdown(transactions.filter(t => t.type === 'EXPENSE')),
-      savingsProgress: savings.map(s => ({ name: s.name, progress: Number(s.currentAmount) / Number(s.targetAmount) }))
+      topExpenseCategories: this.calculateCategoryBreakdown(
+        transactions.filter((t) => t.type === 'EXPENSE'),
+      ),
+      savingsProgress: savings.map((s) => ({
+        name: s.name,
+        progress: Number(s.currentAmount) / Number(s.targetAmount),
+      })),
     };
   }
 
   private calculateCategoryBreakdown(transactions: any[]) {
     const breakdown: Record<string, number> = {};
-    transactions.forEach(t => {
+    transactions.forEach((t) => {
       breakdown[t.category] = (breakdown[t.category] || 0) + Number(t.amount);
     });
     return breakdown;
@@ -892,7 +1024,10 @@ export class FinanceService {
     });
   }
 
-  async createSavingsGoal(familyId: string, data: { name: string; targetAmount: number; deadline?: string }) {
+  async createSavingsGoal(
+    familyId: string,
+    data: { name: string; targetAmount: number; deadline?: string },
+  ) {
     return this.prisma.savingsGoal.create({
       data: {
         ...data,
@@ -921,15 +1056,21 @@ export class FinanceService {
   /**
    * Add funds to savings goal via transaction
    */
-  async addFundsToGoal(userId: string, familyId: string, goalId: string, walletId: string, amount: number) {
-     return this.createTransaction(userId, familyId, {
-        walletId,
-        amount,
-        type: TransactionType.EXPENSE,
-        category: 'Savings',
-        description: `Alokasi dana ke Saving Goal`,
-        savingsGoalId: goalId,
-      });
+  async addFundsToGoal(
+    userId: string,
+    familyId: string,
+    goalId: string,
+    walletId: string,
+    amount: number,
+  ) {
+    return this.createTransaction(userId, familyId, {
+      walletId,
+      amount,
+      type: TransactionType.EXPENSE,
+      category: 'Savings',
+      description: `Alokasi dana ke Saving Goal`,
+      savingsGoalId: goalId,
+    });
   }
 
   /**
@@ -939,24 +1080,32 @@ export class FinanceService {
     const now = new Date();
     const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+    const prevMonthEnd = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
 
     const currentTotal = await this.prisma.transaction.aggregate({
-      where: { 
-        familyId, 
-        type: TransactionType.EXPENSE, 
-        date: { gte: currentMonthStart }, 
-        isDeleted: false 
+      where: {
+        familyId,
+        type: TransactionType.EXPENSE,
+        date: { gte: currentMonthStart },
+        isDeleted: false,
       },
       _sum: { amount: true },
     });
 
     const prevTotal = await this.prisma.transaction.aggregate({
-      where: { 
-        familyId, 
-        type: TransactionType.EXPENSE, 
-        date: { gte: prevMonthStart, lte: prevMonthEnd }, 
-        isDeleted: false 
+      where: {
+        familyId,
+        type: TransactionType.EXPENSE,
+        date: { gte: prevMonthStart, lte: prevMonthEnd },
+        isDeleted: false,
       },
       _sum: { amount: true },
     });

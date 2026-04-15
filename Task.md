@@ -371,9 +371,9 @@
 - [x] 341. Build "Recurring Tasks" (Daily/Weekly Sholat routines).
 - [x] 342. Implement "Overdue Task" alerts.
 - [x] 343. Create "Task Completion Rewards" (Gamification for kids).
-- [ ] 344. Implement "Task History" for auditing.
-- [ ] 345. Build "Shopping List" specialized task view.
-- [ ] 346. Implement "Smart Suggested Tasks" by AI.
+- [x] 344. Implement "Task History" for auditing.
+- [x] 345. Build "Shopping List" specialized task view.
+- [x] 346. Implement "Smart Suggested Tasks" by AI.
 - [x] 347. Create "Priority Levels" for tasks (Low, Medium, High).
 - [ ] 348. Develop "Collaborative Editing" on task descriptions.
 - [ ] 349. Implement "Task Attachments" (Photos of finished work).

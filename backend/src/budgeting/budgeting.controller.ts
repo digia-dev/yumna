@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Delete, Body, UseGuards, Query, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  UseGuards,
+  Query,
+  Param,
+} from '@nestjs/common';
 import { BudgetingService } from './budgeting.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
@@ -14,7 +23,10 @@ export class BudgetingController {
     @Query('period') period?: string,
   ) {
     const defaultPeriod = new Date().toISOString().slice(0, 7); // YYYY-MM
-    return this.budgetingService.getBudgetStatus(familyId, period || defaultPeriod);
+    return this.budgetingService.getBudgetStatus(
+      familyId,
+      period || defaultPeriod,
+    );
   }
 
   @Post('set')
@@ -22,7 +34,12 @@ export class BudgetingController {
     @GetUser('familyId') familyId: string,
     @Body() body: { category: string; amount: number; period: string },
   ) {
-    return this.budgetingService.setBudget(familyId, body.category, body.amount, body.period);
+    return this.budgetingService.setBudget(
+      familyId,
+      body.category,
+      body.amount,
+      body.period,
+    );
   }
 
   @Delete(':id')

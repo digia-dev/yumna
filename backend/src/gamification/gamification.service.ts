@@ -8,15 +8,19 @@ export class GamificationService {
   async getBarakahData(familyId: string) {
     const family = await this.prisma.family.findUnique({
       where: { id: familyId },
-      select: { barakahScore: true, achievements: true, name: true }
+      select: { barakahScore: true, achievements: true, name: true },
     });
 
     if (!family) throw new NotFoundException('Family not found');
 
     const membersCount = await this.prisma.user.count({ where: { familyId } });
-    const transactionsCount = await this.prisma.transaction.count({ where: { familyId, isDeleted: false } });
-    const goalsCount = await this.prisma.savingsGoal.count({ where: { familyId } });
-    
+    const transactionsCount = await this.prisma.transaction.count({
+      where: { familyId, isDeleted: false },
+    });
+    const goalsCount = await this.prisma.savingsGoal.count({
+      where: { familyId },
+    });
+
     // Simple level calculation
     const level = Math.floor(family.barakahScore / 500) + 1;
     const nextLevelExp = level * 500;
@@ -32,8 +36,8 @@ export class GamificationService {
       stats: {
         members: membersCount,
         transactions: transactionsCount,
-        goals: goalsCount
-      }
+        goals: goalsCount,
+      },
     };
   }
 
@@ -41,8 +45,8 @@ export class GamificationService {
     const family = await this.prisma.family.update({
       where: { id: familyId },
       data: {
-        barakahScore: { increment: points }
-      }
+        barakahScore: { increment: points },
+      },
     });
 
     // Check for achievements
@@ -50,10 +54,16 @@ export class GamificationService {
     if (!Array.isArray(achievements)) achievements = [];
 
     const newAchievements = [];
-    if (family.barakahScore >= 1000 && !achievements.includes('BARAKAH_BEGINNER')) {
+    if (
+      family.barakahScore >= 1000 &&
+      !achievements.includes('BARAKAH_BEGINNER')
+    ) {
       newAchievements.push('BARAKAH_BEGINNER');
     }
-    if (family.barakahScore >= 5000 && !achievements.includes('BARAKAH_MASTER')) {
+    if (
+      family.barakahScore >= 5000 &&
+      !achievements.includes('BARAKAH_MASTER')
+    ) {
       newAchievements.push('BARAKAH_MASTER');
     }
 
@@ -61,8 +71,8 @@ export class GamificationService {
       await this.prisma.family.update({
         where: { id: familyId },
         data: {
-          achievements: [...achievements, ...newAchievements]
-        }
+          achievements: [...achievements, ...newAchievements],
+        },
       });
     }
 

@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException, Inject, forwardRef } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import OpenAI from 'openai';
 import axios from 'axios';
@@ -12,12 +17,14 @@ export class AiService {
 
   constructor(
     @Inject(forwardRef(() => FinanceService))
-    private financeService: FinanceService
+    private financeService: FinanceService,
   ) {
     const geminiKey = process.env.GEMINI_API_KEY;
     if (geminiKey) {
       this.genAI = new GoogleGenerativeAI(geminiKey);
-      this.geminiModel = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      this.geminiModel = this.genAI.getGenerativeModel({
+        model: 'gemini-1.5-flash',
+      });
     }
 
     const openaiKey = process.env.OPENAI_API_KEY;
@@ -34,7 +41,9 @@ export class AiService {
     } else if (this.geminiModel) {
       return this.extractWithGemini(text);
     } else {
-      throw new InternalServerErrorException('AI Service not configured (Missing API Keys)');
+      throw new InternalServerErrorException(
+        'AI Service not configured (Missing API Keys)',
+      );
     }
   }
 
@@ -76,7 +85,9 @@ export class AiService {
       return JSON.parse(response.choices[0].message.content || '{}');
     } catch (error) {
       console.error('OpenAI Extraction Error:', error);
-      throw new InternalServerErrorException('Gagal memproses teks dengan OpenAI.');
+      throw new InternalServerErrorException(
+        'Gagal memproses teks dengan OpenAI.',
+      );
     }
   }
 
@@ -115,7 +126,9 @@ export class AiService {
       return JSON.parse(cleanedJson);
     } catch (error) {
       console.error('Gemini Extraction Error:', error);
-      throw new InternalServerErrorException('Gagal memproses teks dengan Gemini.');
+      throw new InternalServerErrorException(
+        'Gagal memproses teks dengan Gemini.',
+      );
     }
   }
 
@@ -131,7 +144,11 @@ export class AiService {
     }
   }
 
-  private async chatWithOpenAI(message: string, history: any[], context: string) {
+  private async chatWithOpenAI(
+    message: string,
+    history: any[],
+    context: string,
+  ) {
     const systemPrompt = `
       Anda adalah Yumna, asisten AI profesional untuk keuangan keluarga Islami. Karakter: Amanah, Empatik, dan Proaktif.
       
@@ -166,7 +183,7 @@ export class AiService {
     const messages: any[] = [
       { role: 'system', content: systemPrompt },
       ...history,
-      { role: 'user', content: message }
+      { role: 'user', content: message },
     ];
 
     try {
@@ -178,22 +195,31 @@ export class AiService {
       return response.choices[0].message.content;
     } catch (error) {
       console.error('OpenAI Chat Error:', error);
-      throw new InternalServerErrorException('Gagal melakukan chat dengan OpenAI.');
+      throw new InternalServerErrorException(
+        'Gagal melakukan chat dengan OpenAI.',
+      );
     }
   }
 
-  private async chatWithGemini(message: string, history: any[], context: string) {
+  private async chatWithGemini(
+    message: string,
+    history: any[],
+    context: string,
+  ) {
     const systemPrompt = `Anda adalah Yumna. Waktu: ${new Date().toISOString()}. Konteks: ${context}. Bantu pengguna dengan santun. Jika ada transaksi, tugas, atau pengingat, gunakan format JSON di akhir pesan (TRANSACTION_RECORD, TASK_CREATE, atau REMINDER_CREATE).`;
-    
+
     try {
       const chat = this.geminiModel.startChat({
         history: [
           { role: 'user', parts: [{ text: systemPrompt }] },
-          { role: 'model', parts: [{ text: 'Baik, saya Yumna. Saya siap membantu.' }] },
-          ...history.map(h => ({
+          {
+            role: 'model',
+            parts: [{ text: 'Baik, saya Yumna. Saya siap membantu.' }],
+          },
+          ...history.map((h) => ({
             role: h.role === 'user' ? 'user' : 'model',
             parts: [{ text: h.content }],
-          }))
+          })),
         ],
         generationConfig: {
           maxOutputTokens: 1000,
@@ -205,14 +231,16 @@ export class AiService {
       return response.text();
     } catch (error) {
       console.error('Gemini Chat Error:', error);
-      throw new InternalServerErrorException('Gagal melakukan chat dengan Gemini.');
+      throw new InternalServerErrorException(
+        'Gagal melakukan chat dengan Gemini.',
+      );
     }
   }
 
   // Task 306: AI Moderation
   async generateAdvisorInsight(familyId: string) {
     const data = await this.financeService.getWeeklyAdvisorData(familyId);
-    
+
     const prompt = `
       Sebagai Yumna, asisten keuangan keluarga Islami, berikan 1 kalimat saran singkat (maksimal 20 kata) berdasarkan data keuangan minggu ini:
       Pemasukan: ${data.income}
@@ -223,10 +251,10 @@ export class AiService {
       Berikan saran yang memotivasi, praktis, dan religius. Jangan gunakan placeholder.
     `;
 
-    const model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     const result = await model.generateContent(prompt);
     const text = result.response.text();
-    
+
     return { insight: text.trim() };
   }
 
@@ -246,14 +274,18 @@ export class AiService {
   // Task 327: Image-to-Transaction (OCR for receipts)
   async processReceipt(imageUrl: string) {
     if (!this.geminiModel) {
-      throw new InternalServerErrorException('Gemini not configured for vision tasks.');
+      throw new InternalServerErrorException(
+        'Gemini not configured for vision tasks.',
+      );
     }
 
     try {
       // Fetch image bytes
-      const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+      const response = await axios.get(imageUrl, {
+        responseType: 'arraybuffer',
+      });
       const buffer = Buffer.from(response.data, 'binary');
-      
+
       const prompt = `
         Ekstrak data transaksi dari gambar struk/nota ini ke dalam format JSON.
         Identifikasi: nominal (amount), kategori (category), deskripsi (description), dan tipe (EXPENSE).
@@ -293,7 +325,7 @@ export class AiService {
   // Task 326: Auto-translate
   async translateText(text: string, targetLang: string = 'Indonesian') {
     const prompt = `Translate the following chat message to ${targetLang}. Preserve the emotional tone and any Islamic terms. Only return the translation.\n\nMessage: "${text}"`;
-    
+
     try {
       if (this.openai) {
         const response = await this.openai.chat.completions.create({
@@ -306,14 +338,14 @@ export class AiService {
         return result.response.text();
       }
     } catch (error) {
-       console.error('Translation Error:', error);
-       return text;
+      console.error('Translation Error:', error);
+      return text;
     }
   }
 
   async suggestTasks(familyId: string) {
     const context = await this.financeService.getWeeklyAdvisorData(familyId);
-    
+
     const prompt = `
       Sebagai Yumna, asisten keluarga Islami, sarankan 3 tugas barakah yang relevan untuk keluarga ini minggu ini.
       Konteks Keuangan: Pemasukan ${context.income || 0}, Pengeluaran ${context.expense || 0}.
@@ -344,8 +376,8 @@ export class AiService {
         return JSON.parse(cleanedJson);
       }
     } catch (error) {
-       console.error('Task Suggestions Error:', error);
-       return [];
+      console.error('Task Suggestions Error:', error);
+      return [];
     }
   }
 }

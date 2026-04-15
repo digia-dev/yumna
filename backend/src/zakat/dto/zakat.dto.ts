@@ -1,4 +1,11 @@
-import { IsNumber, IsString, IsEnum, Min, IsNotEmpty, IsOptional } from 'class-validator';
+import {
+  IsNumber,
+  IsString,
+  IsEnum,
+  Min,
+  IsNotEmpty,
+  IsOptional,
+} from 'class-validator';
 
 export class CalculateZakatDto {
   @IsNumber()

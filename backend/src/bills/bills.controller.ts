@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { BillsService } from './bills.service';
 import { CreateBillDto, UpdateBillDto } from './dto/bill.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -31,7 +41,11 @@ export class BillsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update bill' })
-  update(@Param('id') id: string, @Request() req: any, @Body() dto: UpdateBillDto) {
+  update(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Body() dto: UpdateBillDto,
+  ) {
     return this.billsService.update(id, req.user.familyId, dto);
   }
 
@@ -43,7 +57,16 @@ export class BillsController {
 
   @Post(':id/pay')
   @ApiOperation({ summary: 'Pay a bill' })
-  pay(@Param('id') id: string, @Request() req: any, @Body('amount') amount: number) {
-    return this.billsService.payBill(id, req.user.familyId, req.user.userId, amount);
+  pay(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Body('amount') amount: number,
+  ) {
+    return this.billsService.payBill(
+      id,
+      req.user.familyId,
+      req.user.userId,
+      amount,
+    );
   }
 }

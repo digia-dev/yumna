@@ -28,16 +28,20 @@ export class ScheduleService {
     });
 
     if (reminders.length > 0) {
-      this.logger.log(`Found ${reminders.length} pending reminders to process.`);
+      this.logger.log(
+        `Found ${reminders.length} pending reminders to process.`,
+      );
     }
 
     for (const reminder of reminders) {
       try {
-        this.logger.log(`Sending reminder: [${reminder.title}] to family [${reminder.familyId}] for user [${reminder.userId}]`);
-        
+        this.logger.log(
+          `Sending reminder: [${reminder.title}] to family [${reminder.familyId}] for user [${reminder.userId}]`,
+        );
+
         // Push message to chat as AI system message (Task 309)
         const content = `🕒 **PENGINGAT YUMNA**\n\nAssalamu'alaikum, @${reminder.user?.name || 'User'}.\nYumna ingin mengingatkan:\n\n**${reminder.title}**\n${reminder.content || ''}\n\n*Semoga barakah.*`;
-        
+
         await this.chatService.sendAiMessage(reminder.familyId, content);
 
         await this.prisma.reminder.update({
@@ -45,7 +49,9 @@ export class ScheduleService {
           data: { isSent: true },
         });
       } catch (error) {
-        this.logger.error(`Failed to send reminder ${reminder.id}: ${error.message}`);
+        this.logger.error(
+          `Failed to send reminder ${reminder.id}: ${error.message}`,
+        );
       }
     }
   }
@@ -53,27 +59,30 @@ export class ScheduleService {
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async handleRecurringTasks() {
     this.logger.log('Running recurring tasks generation...');
-    
+
     // Find all "Template" tasks or parental recurring tasks
     const recurringTemplates = await this.prisma.task.findMany({
       where: {
         recurrence: { not: 'NONE' },
         parentId: null, // Only top-level templates
         isDeleted: false,
-      }
+      },
     });
 
     for (const template of recurringTemplates) {
       try {
         // Calculate next due date
-        let nextDueDate = new Date(template.dueDate || new Date());
+        const nextDueDate = new Date(template.dueDate || new Date());
         const now = new Date();
 
         // If the template's first due date is already in the past, move it forward
         while (nextDueDate < now) {
-          if (template.recurrence === 'DAILY') nextDueDate.setDate(nextDueDate.getDate() + 1);
-          else if (template.recurrence === 'WEEKLY') nextDueDate.setDate(nextDueDate.getDate() + 7);
-          else if (template.recurrence === 'MONTHLY') nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+          if (template.recurrence === 'DAILY')
+            nextDueDate.setDate(nextDueDate.getDate() + 1);
+          else if (template.recurrence === 'WEEKLY')
+            nextDueDate.setDate(nextDueDate.getDate() + 7);
+          else if (template.recurrence === 'MONTHLY')
+            nextDueDate.setMonth(nextDueDate.getMonth() + 1);
           else break;
         }
 
@@ -83,7 +92,7 @@ export class ScheduleService {
             parentId: template.id,
             dueDate: nextDueDate,
             isDeleted: false,
-          }
+          },
         });
 
         if (!existingNext) {
@@ -99,12 +108,16 @@ export class ScheduleService {
               recurrence: template.recurrence,
               parentId: template.id,
               dueDate: nextDueDate,
-            }
+            },
           });
-          this.logger.log(`Generated next instance for task: ${template.title} on ${nextDueDate.toDateString()}`);
+          this.logger.log(
+            `Generated next instance for task: ${template.title} on ${nextDueDate.toDateString()}`,
+          );
         }
       } catch (err) {
-        this.logger.error(`Failed to generate recurring task for ${template.id}: ${err.message}`);
+        this.logger.error(
+          `Failed to generate recurring task for ${template.id}: ${err.message}`,
+        );
       }
     }
   }
@@ -129,7 +142,7 @@ export class ScheduleService {
     for (const task of upcomingTasks) {
       try {
         const message = `⚠️ **PENGINGAT AMANAH**\n\nAssalamu'alaikum, ${task.assignee ? `@${task.assignee.name}` : 'Keluarga'}.\nAda tugas yang mendekati batas waktu:\n\n**${task.title}**\nBatas: ${task.dueDate?.toLocaleString('id-ID') || 'N/A'}\n\n*Semangat mengerjakannya!*`;
-        
+
         await this.chatService.sendAiMessage(task.familyId, message);
 
         await this.prisma.task.update({
@@ -137,7 +150,9 @@ export class ScheduleService {
           data: { dueReminderSent: true },
         });
       } catch (err) {
-        this.logger.error(`Failed to send due reminder for task ${task.id}: ${err.message}`);
+        this.logger.error(
+          `Failed to send due reminder for task ${task.id}: ${err.message}`,
+        );
       }
     }
   }
@@ -161,15 +176,21 @@ export class ScheduleService {
     for (const task of overdueTasks) {
       try {
         const message = `🚨 **AMANAH TERLEWAT (OVERDUE)**\n\nAssalamu'alaikum, ${task.assignee ? `@${task.assignee.name}` : 'Keluarga'}.\nTugas ini sudah melewati batas waktu:\n\n**${task.title}**\nBatas: ${task.dueDate?.toLocaleString('id-ID') || 'N/A'}\n\n*Yuk, segera diselesaikan demi keberkahan.*`;
-        
+
         await this.chatService.sendAiMessage(task.familyId, message);
       } catch (err) {
-        this.logger.error(`Failed to send overdue alert for ${task.id}: ${err.message}`);
+        this.logger.error(
+          `Failed to send overdue alert for ${task.id}: ${err.message}`,
+        );
       }
     }
   }
 
-  async createReminder(userId: string, familyId: string, data: { title: string; content?: string; remindAt: Date }) {
+  async createReminder(
+    userId: string,
+    familyId: string,
+    data: { title: string; content?: string; remindAt: Date },
+  ) {
     return this.prisma.reminder.create({
       data: {
         ...data,
@@ -211,8 +232,12 @@ export class ScheduleService {
     });
 
     return {
-      reminders: reminders.map(r => ({ ...r, type: 'REMINDER', date: r.remindAt })),
-      tasks: tasks.map(t => ({ ...t, type: 'TASK', date: t.dueDate })),
+      reminders: reminders.map((r) => ({
+        ...r,
+        type: 'REMINDER',
+        date: r.remindAt,
+      })),
+      tasks: tasks.map((t) => ({ ...t, type: 'TASK', date: t.dueDate })),
     };
   }
 }

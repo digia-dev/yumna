@@ -25,7 +25,9 @@ describe('Zakat Engine (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, transform: true }),
+    );
     app.useGlobalFilters(new AllExceptionsFilter());
     app.useGlobalInterceptors(new ResponseInterceptor());
     await app.init();
@@ -34,11 +36,17 @@ describe('Zakat Engine (e2e)', () => {
 
     // Setup Family & User
     await prisma.user.deleteMany({ where: { email: testUser.email } });
-    const family = await prisma.family.create({ data: { name: 'Zakat Test Family' } });
+    const family = await prisma.family.create({
+      data: { name: 'Zakat Test Family' },
+    });
     familyId = family.id;
 
-    await request(app.getHttpServer()).post('/auth/register').send({ ...testUser, familyId });
-    const loginRes = await request(app.getHttpServer()).post('/auth/login').send({ email: testUser.email, password: testUser.password });
+    await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({ ...testUser, familyId });
+    const loginRes = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: testUser.email, password: testUser.password });
     jwtToken = loginRes.body.data.access_token;
   });
 
@@ -83,7 +91,7 @@ describe('Zakat Engine (e2e)', () => {
         .expect(201);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.amount).toBe("3000000"); // Prisma returns Decimal as string/number depending on config
+      expect(response.body.data.amount).toBe('3000000'); // Prisma returns Decimal as string/number depending on config
     });
   });
 });

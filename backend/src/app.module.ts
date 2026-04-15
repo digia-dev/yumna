@@ -29,9 +29,10 @@ import { BillsModule } from './bills/bills.module';
   imports: [
     LoggerModule.forRoot({
       pinoHttp: {
-        transport: process.env.NODE_ENV !== 'production'
-          ? { target: 'pino-pretty' }
-          : undefined,
+        transport:
+          process.env.NODE_ENV !== 'production'
+            ? { target: 'pino-pretty' }
+            : undefined,
       },
     }),
     PrismaModule,
@@ -41,10 +42,12 @@ import { BillsModule } from './bills/bills.module';
     FinanceModule,
     TasksModule,
     BillsModule,
-    ThrottlerModule.forRoot([{
-      ttl: 60000,
-      limit: 10,
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 10,
+      },
+    ]),
     UploadsModule,
     InvitationsModule,
     FamilyModule,

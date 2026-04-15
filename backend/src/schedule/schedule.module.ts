@@ -6,11 +6,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { ScheduleController } from './schedule.controller';
 
 @Module({
-  imports: [
-    NestScheduleModule.forRoot(),
-    ChatModule,
-    PrismaModule,
-  ],
+  imports: [NestScheduleModule.forRoot(), ChatModule, PrismaModule],
   providers: [ScheduleService],
   controllers: [ScheduleController],
   exports: [ScheduleService],
