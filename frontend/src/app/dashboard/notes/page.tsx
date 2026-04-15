@@ -273,7 +273,7 @@ export default function NotesPage() {
         {activeNote && (
           <DialogContent className="max-w-2xl rounded-[40px] border-none shadow-2xl p-0 overflow-hidden max-h-[90vh] flex flex-col"
             style={{ backgroundColor: activeNote.color ?? "#fefce8" }}>
-            <div className="p-7 pb-4 border-b border-black/5 flex-shrink-0">
+            <div className="p-7 pb-4 border-b border-black/5 shrink-0">
               <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-2 flex-wrap">
                   <Badge className="bg-black/10 text-slate-700 border-none text-[9px] font-black rounded-full">{activeNote.category}</Badge>

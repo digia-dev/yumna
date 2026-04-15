@@ -677,7 +677,7 @@ export default function TasksPage() {
         {/* 350 – Family Goals */}
         <TabsContent value="goals" className="mt-0">
           {goalTasks.length === 0 ? (
-            <div className="text-center py-24 bg-gradient-to-b from-emerald-950 to-emerald-900 rounded-[40px]">
+            <div className="text-center py-24 bg-linear-to-b from-emerald-950 to-emerald-900 rounded-[40px]">
               <Target size={56} className="text-emerald-600 mx-auto mb-6" />
               <h3 className="text-2xl font-black text-white">Belum Ada Goal Keluarga</h3>
               <p className="text-emerald-300/60 text-sm mt-2 mb-8">Centang "Goal Keluarga" saat membuat tugas.</p>
@@ -699,7 +699,7 @@ export default function TasksPage() {
         {/* 356 – Task Leaderboard */}
         <TabsContent value="leaderboard" className="mt-0">
           <div className="space-y-4">
-            <div className="bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-800 p-8 rounded-[40px] text-white mb-8 relative overflow-hidden">
+            <div className="bg-linear-to-br from-emerald-950 via-emerald-900 to-emerald-800 p-8 rounded-[40px] text-white mb-8 relative overflow-hidden">
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/5 rounded-full" />
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-2">
@@ -713,9 +713,9 @@ export default function TasksPage() {
               <motion.div key={member.id} initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: i * 0.06 }}
                 className={cn("rounded-[28px] p-5 border flex items-center gap-5 transition-all",
-                  i === 0 ? "bg-gradient-to-r from-amber-50 to-amber-100/50 border-amber-200 shadow-lg shadow-amber-100"
-                  : i === 1 ? "bg-gradient-to-r from-slate-50 to-slate-100/50 border-slate-200"
-                  : i === 2 ? "bg-gradient-to-r from-orange-50/50 to-orange-100/30 border-orange-100"
+                  i === 0 ? "bg-linear-to-r from-amber-50 to-amber-100/50 border-amber-200 shadow-lg shadow-amber-100"
+                  : i === 1 ? "bg-linear-to-r from-slate-50 to-slate-100/50 border-slate-200"
+                  : i === 2 ? "bg-linear-to-r from-orange-50/50 to-orange-100/30 border-orange-100"
                   : "bg-white border-slate-100")}>
                 <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center font-black text-lg shrink-0",
                   i === 0 ? "bg-amber-400 text-white" : i === 1 ? "bg-slate-300 text-white" : i === 2 ? "bg-orange-300 text-white" : "bg-slate-100 text-slate-500")}>
@@ -755,7 +755,7 @@ export default function TasksPage() {
           <div className="space-y-8">
             {weeklyData ? (
               <>
-                <div className="bg-gradient-to-r from-emerald-950 to-emerald-800 p-6 rounded-[32px] text-white">
+                <div className="bg-linear-to-r from-emerald-950 to-emerald-800 p-6 rounded-[32px] text-white">
                   <div className="flex items-center gap-3 mb-1">
                     <Repeat size={20} className="text-emerald-400" />
                     <h2 className="text-xl font-black">Rutinitas Mingguan</h2>
@@ -796,7 +796,7 @@ export default function TasksPage() {
         {/* 362 – Holiday Planner */}
         <TabsContent value="holiday" className="mt-0">
           <div className="space-y-6">
-            <div className="bg-gradient-to-br from-cyan-600 to-blue-700 p-8 rounded-[40px] text-white relative overflow-hidden">
+            <div className="bg-linear-to-br from-cyan-600 to-blue-700 p-8 rounded-[40px] text-white relative overflow-hidden">
               <div className="absolute -bottom-8 -right-8 text-[120px] opacity-10">🌴</div>
               <Palmtree size={32} className="text-cyan-200 mb-3" />
               <h2 className="text-2xl font-black mb-1">Rencana Liburan Keluarga</h2>
@@ -1128,7 +1128,7 @@ export default function TasksPage() {
 
                 {/* 350 Goal Progress */}
                 {selectedTask.isGoal && (
-                  <div className="p-6 bg-gradient-to-br from-emerald-950 to-emerald-900 rounded-[28px] text-white">
+                  <div className="p-6 bg-linear-to-br from-emerald-950 to-emerald-900 rounded-[28px] text-white">
                     <div className="flex justify-between items-center mb-2">
                       <div className="flex items-center gap-2">
                         <Target size={15} className="text-emerald-400" />
@@ -1431,7 +1431,7 @@ function FamilyGoalCard({ task, onClick, onProgressUpdate, familyMembers }: {
   return (
     <motion.div whileHover={{ scale: 1.01 }} onClick={onClick}
       className={cn("rounded-[36px] p-8 cursor-pointer border transition-all overflow-hidden relative",
-        isComplete ? "bg-gradient-to-br from-emerald-600 to-emerald-700 border-emerald-500" : "bg-white border-emerald-100 hover:shadow-xl")}>
+        isComplete ? "bg-linear-to-br from-emerald-600 to-emerald-700 border-emerald-500" : "bg-white border-emerald-100 hover:shadow-xl")}>
       {isComplete && <div className="absolute top-4 right-4"><Star size={24} className="text-white/50 fill-white/20" /></div>}
       <div className="flex justify-between items-start mb-5">
         <Badge className={cn("rounded-full text-[9px] font-black px-3", isComplete ? "bg-white/20 text-white" : "bg-emerald-50 text-emerald-700 border-none")}>{task.category}</Badge>

@@ -169,7 +169,7 @@ export default function AnalyticsPage() {
                         </div>
                         <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                           <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ delay: i * 0.1, duration: 0.8 }}
-                            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full" />
+                            className="h-full bg-linear-to-r from-emerald-500 to-teal-400 rounded-full" />
                         </div>
                       </div>
                       <div className="text-slate-300 group-hover:text-emerald-500 transition-colors shrink-0">
@@ -309,7 +309,7 @@ export default function AnalyticsPage() {
           {forecast && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="rounded-[32px] border-none shadow-xl overflow-hidden">
-                <div className={cn("p-6 text-white", forecast.trend === 'INCREASING' ? "bg-gradient-to-br from-rose-600 to-orange-600" : forecast.trend === 'DECREASING' ? "bg-gradient-to-br from-emerald-600 to-teal-700" : "bg-gradient-to-br from-blue-600 to-indigo-700")}>
+                <div className={cn("p-6 text-white", forecast.trend === 'INCREASING' ? "bg-linear-to-br from-rose-600 to-orange-600" : forecast.trend === 'DECREASING' ? "bg-linear-to-br from-emerald-600 to-teal-700" : "bg-linear-to-br from-blue-600 to-indigo-700")}>
                   <div className="flex items-center gap-3 mb-4">
                     {forecast.trend === 'INCREASING' ? <TrendingUp size={24} /> : forecast.trend === 'DECREASING' ? <TrendingDown size={24} /> : <Minus size={24} />}
                     <p className="text-lg font-black">Prediksi Bulan Depan</p>
@@ -348,7 +348,7 @@ export default function AnalyticsPage() {
                           return (
                             <div key={i} className="flex-1 flex flex-col items-center gap-1">
                               <motion.div initial={{ height: 0 }} animate={{ height: `${Math.max(4, (d.netWorth / max) * 100)}%` }}
-                                transition={{ delay: i * 0.1 }} className="w-full bg-gradient-to-t from-emerald-600 to-emerald-400 rounded-t-lg" />
+                                transition={{ delay: i * 0.1 }} className="w-full bg-linear-to-t from-emerald-600 to-emerald-400 rounded-t-lg" />
                               <span className="text-[7px] text-slate-400 truncate">{d.month?.slice(5)}</span>
                             </div>
                           );

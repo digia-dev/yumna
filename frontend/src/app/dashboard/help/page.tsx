@@ -167,7 +167,7 @@ export default function HelpCenterPage() {
       </div>
 
       {/* Contact CTA */}
-      <Card className="rounded-[32px] border-none bg-gradient-to-br from-emerald-600 to-teal-700 text-white overflow-hidden">
+      <Card className="rounded-[32px] border-none bg-linear-to-br from-emerald-600 to-teal-700 text-white overflow-hidden">
         <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <h3 className="text-xl font-black mb-2">Masih ada pertanyaan?</h3>

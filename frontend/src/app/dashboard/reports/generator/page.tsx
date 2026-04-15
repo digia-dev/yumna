@@ -473,7 +473,7 @@ export default function ReportGeneratorPage() {
                   ))}
                 </div>
 
-                <div className="p-5 rounded-[24px] bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
+                <div className="p-5 rounded-[24px] bg-linear-to-br from-blue-600 to-indigo-700 text-white">
                   <p className="text-[9px] font-black uppercase tracking-widest opacity-70 mb-2">Estimasi Pajak Terhutang (PPh 21)</p>
                   <p className="text-4xl font-black">Rp {Math.round(taxEstimate).toLocaleString("id-ID")}</p>
                   <p className="text-xs opacity-70 mt-2">Berdasarkan tarif progresif: 5% (s.d. 60jt) · 15% (60-250jt) · 25% (di atas 250jt)</p>

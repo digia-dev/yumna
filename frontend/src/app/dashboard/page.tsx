@@ -216,7 +216,7 @@ export default function DashboardPage() {
 
       // ── BARAKAH ────────────────────────────────────────────────────────
       case "barakah": return barakah ? (
-        <div className="bg-gradient-to-r from-emerald-50 to-amber-50 p-6 rounded-3xl border border-emerald-100 shadow-sm flex flex-col md:flex-row items-center gap-6">
+        <div className="bg-linear-to-r from-emerald-50 to-amber-50 p-6 rounded-3xl border border-emerald-100 shadow-sm flex flex-col md:flex-row items-center gap-6">
           <div className="relative shrink-0">
             <div className="w-20 h-20 rounded-2xl bg-white shadow-md flex items-center justify-center border-4 border-emerald-500/10">
               <Bot size={40} className="text-emerald-700" />
@@ -296,7 +296,7 @@ export default function DashboardPage() {
 
       // ── SPENDING ANALYSIS ──────────────────────────────────────────────
       case "spending": return spendingComp ? (
-        <Card className="border-none shadow-sm bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-3xl overflow-hidden relative group">
+        <Card className="border-none shadow-sm bg-linear-to-br from-slate-900 to-slate-800 text-white rounded-3xl overflow-hidden relative group">
           <CardHeader className="pb-2 relative z-10">
             <CardTitle className="text-[10px] font-black uppercase tracking-widest text-slate-400">Analisis Belanja</CardTitle>
           </CardHeader>

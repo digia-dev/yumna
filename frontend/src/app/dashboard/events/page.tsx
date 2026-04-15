@@ -173,7 +173,7 @@ export default function EventsPage() {
             const meta = EVENT_CATEGORY_META[ev.category] ?? EVENT_CATEGORY_META.OTHER;
             return (
               <motion.div key={ev.id} initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: i * 0.08 }}
-                className={cn("rounded-[32px] p-6 text-white relative overflow-hidden cursor-pointer group", `bg-gradient-to-br ${meta.gradient}`)}
+                className={cn("rounded-[32px] p-6 text-white relative overflow-hidden cursor-pointer group", `bg-linear-to-br ${meta.gradient}`)}
                 onClick={() => openEdit(ev)}>
                 <div className="absolute -top-4 -right-4 text-[80px] opacity-10 group-hover:scale-110 transition-transform">{meta.icon}</div>
                 <div className="relative">
@@ -225,7 +225,7 @@ export default function EventsPage() {
         {/* 379 – Meeting Tab */}
         <TabsContent value="meeting" className="mt-6">
           {meetings.length === 0 ? (
-            <div className="text-center py-20 bg-gradient-to-b from-blue-950 to-blue-900 rounded-[40px]">
+            <div className="text-center py-20 bg-linear-to-b from-blue-950 to-blue-900 rounded-[40px]">
               <Users size={48} className="text-blue-400 mx-auto mb-4" />
               <h3 className="text-xl font-black text-white">Belum Ada Rapat Keluarga</h3>
               <p className="text-blue-300/60 text-sm mt-2 mb-6">Buat rapat untuk mendiskusikan keuangan, rencana liburan, dan lainnya.</p>
@@ -239,7 +239,7 @@ export default function EventsPage() {
               {meetings.map(ev => (
                 <Card key={ev.id} className="rounded-[32px] border-blue-100 overflow-hidden">
                   <CardContent className="p-0">
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
+                    <div className="bg-linear-to-r from-blue-600 to-indigo-700 p-6 text-white">
                       <div className="flex justify-between items-start">
                         <div>
                           <Badge className="bg-white/20 text-white border-none text-[9px] font-black mb-3">🤝 Rapat Keluarga</Badge>
@@ -438,7 +438,7 @@ function EventList({ events, onEdit, onDelete, onOpenMeeting }: {
             <Card className="rounded-[28px] border-slate-100 overflow-hidden hover:shadow-lg transition-all group">
               <CardContent className="p-0 flex">
                 {/* Left accent */}
-                <div className={cn("w-2 shrink-0 bg-gradient-to-b", meta.gradient)}
+                <div className={cn("w-2 shrink-0 bg-linear-to-b", meta.gradient)}
                   style={ev.color ? { background: ev.color } : undefined} />
                 <div className="flex-1 p-5 flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-slate-50 shrink-0">{meta.icon}</div>
