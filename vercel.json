@@ -1,15 +1,8 @@
 {
   "version": 2,
+  "installCommand": "cd frontend && npm install --legacy-peer-deps",
   "buildCommand": "cd frontend && npm install --legacy-peer-deps && npm run build",
   "outputDirectory": "frontend/.next",
-  "installCommand": "cd frontend && npm install --legacy-peer-deps",
-  "framework": "nextjs",
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://api.yumna.my.id/:path*"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",

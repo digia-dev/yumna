@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, } from "react";
 import {
   Plus, Search, Pin, PinOff, Trash2, Edit2, Tag, FileText,
   Loader2, Save, X, Palette,
 } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";

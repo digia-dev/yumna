@@ -9,6 +9,7 @@
     "studio": "cd backend && npx prisma studio"
   },
   "devDependencies": {
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "next": "16.2.3"
   }
 }

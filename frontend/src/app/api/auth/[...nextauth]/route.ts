@@ -12,7 +12,7 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         try {
-          const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/auth/login`, {
+          const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || "http://yumna-ashen.vercel.app"}/auth/login`, {
             email: credentials?.email,
             password: credentials?.password,
           });
